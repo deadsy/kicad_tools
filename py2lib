@@ -2,15 +2,74 @@
 #-----------------------------------------------------------------------------
 """
 
-Convert a python defined part into a schematic library component
+Convert python defined parts into KiCAD libraries
 
 """
 #-----------------------------------------------------------------------------
 
-import ggm
+import getopt
+import sys
+import os
+
+#-----------------------------------------------------------------------------
+
+_ifile = None
+_otype = None
+
+#-----------------------------------------------------------------------------
+
+def print_usage(argv):
+  print 'Usage: %s [options]' % argv[0]
+  print 'Options:'
+  print '%-18s%s' % ('-i <input_file>', 'input file')
+  print '%-18s%s' % ('-t [dcm,lib]', 'output type')
+
+def error(msg, usage=False):
+  print 'error: %s' % msg
+  if usage:
+    print_usage(sys.argv)
+  sys.exit(1)
+
+def warning(msg, fname=True):
+  if fname:
+    print '%s: warning: %s' % (_ifile, msg)
+  else:
+    print 'warning: %s' % msg
+
+def process_options(argv):
+  """process command line options"""
+  global _ifile, _otype
+  try:
+    (opts, args) = getopt.getopt(sys.argv[1:], "i:t:")
+  except getopt.GetoptError, err:
+    error(str(err), True)
+  if args:
+    error('invalid arguments on command line', True)
+  for (opt, val) in opts:
+    if opt == '-i':
+      _ifile = val
+    if opt == '-t':
+      _otype = val
+
+  if not _ifile:
+    error('specify an input file', True)
+
+  if _otype not in ('dcm', 'lib'):
+    error('specify an output type', True)
+
+#-----------------------------------------------------------------------------
 
 def main():
-  print ggm.lib
+  process_options(sys.argv)
+  import_dir = os.path.split(_ifile)[0]
+  import_name = os.path.split(_ifile)[1].split('.')[0]
+  sys.path.append(import_dir)
+  module = __import__(import_name)
+
+  if _otype == 'dcm':
+    print module.dcm
+  if _otype == 'lib':
+    print module.lib
 
 main()
 

@@ -20,6 +20,8 @@ class sch_pin(object):
     self.dmg = 1
     self.type = 'P'
     self.shape = None
+    self.x = 0
+    self.y = 0
 
   def set_xy(self, x, y):
     """set the x,y coordinate"""
@@ -63,7 +65,7 @@ class sch_pin(object):
     s.append('X')
     s.append(self.name)
     s.append(self.pin)
-    s.append('%d %d' % (self.x,self.y))
+    s.append('%d %d' % (self.x, self.y))
     s.append('%d' % self.length)
     s.append(self.orientation)
     s.append('%d' % self.sizenum)
@@ -77,21 +79,35 @@ class sch_pin(object):
 #-----------------------------------------------------------------------------
 
 class sch_rect(object):
-  def __init__(self):
-    self.x1
-    self.y1
-    self.x2
-    self.y2
+  def __init__(self, w, h):
+    self.x1 = -w/2
+    self.y1 = -h/2
+    self.x2 = w/2
+    self.y2 = h/2
     self.part = 0
     self.dmg = 0
     self.pen = 0
     self.fill = 'N'
 
+  def set_xy(self, x, y):
+    self.x1 = x
+    self.y1 = y
+
+  def offset(self, x, y):
+    self.x1 += x
+    self.y1 += y
+    self.x2 += x
+    self.y2 += y
+
+  def set_size(self, w, h):
+    self.x2 = self.x1 + w
+    self.y2 = self.y1 + h
+
   def __str__(self):
     # S X1 Y1 X2 Y2 part dmg pen fill
     s = []
     s.append('S')
-    s.append('%d %d %d %d' % (self.x1,self.y1, self.x2, self.y2))
+    s.append('%d %d %d %d' % (self.x1, self.y1, self.x2, self.y2))
     s.append('%d' % self.part)
     s.append('%d' % self.dmg)
     s.append('%d' % self.pen)
@@ -141,6 +157,21 @@ class sch_text(object):
 
 #-----------------------------------------------------------------------------
 
+class sch_unit(object):
+  """schematic unit"""
+
+  def __init__(self):
+    self.pins = []
+    self.shapes = []
+
+  def add_pin(self, p):
+    self.pins.append(p)
+
+  def add_shape(self, s):
+    self.shapes.append(s)
+
+#-----------------------------------------------------------------------------
+
 class sch_component(object):
 
   def __init__(self, name, ref):
@@ -153,6 +184,7 @@ class sch_component(object):
     self.locked = False
     self.power = False
     self.pins = []
+    self.shapes = []
     self.text = (
       sch_text(self.ref), # F0 reference
       sch_text(self.name), # F1 component name
@@ -162,6 +194,9 @@ class sch_component(object):
 
   def add_pin(self, p):
     self.pins.append(p)
+
+  def add_shape(self, s):
+    self.shapes.append(s)
 
   def emit_def(self):
     s = []
@@ -193,7 +228,8 @@ class sch_component(object):
   def emit_draw(self):
     s = []
     s.append('DRAW')
-    s.extend([str(p) for p in self.pins])
+    s.extend([str(x) for x in self.shapes])
+    s.extend([str(x) for x in self.pins])
     s.append('ENDDRAW')
     return '\n'.join(s)
 
@@ -231,6 +267,56 @@ class sch_lib(object):
     s = []
     s.append(self.emit_head())
     s.extend([str(c) for c in self.components])
+    s.append(self.emit_tail())
+    return '\n'.join(s)
+
+#-----------------------------------------------------------------------------
+
+class doc_component(object):
+  """documentation component"""
+
+  def __init__(self, name, descr):
+    self.name = name
+    self.description = descr
+    self.keywords = []
+
+  def add_keywords(self, k):
+    self.keywords.extend(k)
+
+  def __str__(self):
+    s = []
+    s.append('#\n$CMP %s' % self.name)
+    s.append('D %s' % self.description)
+    s.append('K %s' % ' '.join([x for x in self.keywords]))
+    s.append('$ENDCMP')
+    return '\n'.join(s)
+
+#-----------------------------------------------------------------------------
+
+class doc_lib(object):
+  """documentation library"""
+
+  def __init__(self, name):
+    self.name = name
+    self.components = []
+
+  def add_component(self, c):
+    self.components.append(c)
+
+  def emit_head(self):
+    s = []
+    s.append('EESchema-DOCLIB  Version 2.0')
+    return '\n'.join(s)
+
+  def emit_tail(self):
+    s = []
+    s.append('#\n#End Doc Library')
+    return '\n'.join(s)
+
+  def __str__(self):
+    s = []
+    s.append(self.emit_head())
+    s.extend([str(x) for x in self.components])
     s.append(self.emit_tail())
     return '\n'.join(s)
 
