@@ -116,7 +116,7 @@ pins = (
   (2,50, 'GND', 'P'),
 )
 
-mb997 = kicad.sch_component('MB997')
+mb997 = kicad.sch_component('MB997', 'U')
 
 for (connector, pin, name, type) in pins:
   p = kicad.sch_pin('%d.%d' % (connector, pin), name)

@@ -34,7 +34,7 @@ class sch_pin(object):
       'U', # up
       'D' # down
       )
-    assert o in o_vals, 'bad pin orientation %s' % t
+    assert o in o_vals, 'bad pin orientation %s' % o
     self.orientation = o
 
   def set_type(self, t):
@@ -100,23 +100,88 @@ class sch_rect(object):
 
 #-----------------------------------------------------------------------------
 
+class sch_text(object):
+  """schematic text"""
+
+  def __init__(self, text):
+    self.text = text
+    self.size = 50
+    self.orientation = 'H'
+    self.visible = len(self.text) != 0
+    self.halign = 'C'
+    self.valign = 'C'
+    self.italic = False
+    self.bold = False
+    self.x = 0
+    self.y = 0
+
+  def set_xy(self, x, y):
+    self.x = x
+    self.y = y
+
+  def set_orientation(self, o):
+    """set the text orientation"""
+    o_vals = (
+      'H', # horizontal
+      'V', # vertical
+      )
+    assert o in o_vals, 'bad text orientation %s' % o
+    self.orientation = o
+
+  def __str__(self):
+    s = []
+    s.append('"%s"' % self.text)
+    s.append('%d %d' % (self.x, self.y))
+    s.append('%d' % self.size)
+    s.append(self.orientation)
+    s.append(('I', 'V')[self.visible])
+    s.append(self.halign)
+    s.append('%s%s%s' % (self.valign, ('N', 'I')[self.italic], ('N', 'B')[self.bold]))
+    return ' '.join(s)
+
+#-----------------------------------------------------------------------------
+
 class sch_component(object):
 
-  def __init__(self, name):
+  def __init__(self, name, ref):
     self.name = name
+    self.ref = ref
+    self.ofs = 50
+    self.pin_names = True
+    self.pin_numbers = True
+    self.nparts = 1
+    self.locked = False
+    self.power = False
     self.pins = []
+    self.text = (
+      sch_text(self.ref), # F0 reference
+      sch_text(self.name), # F1 component name
+      sch_text(""), # F2 footprint name
+      sch_text(""), # F3 relative path to datasheet
+    )
 
   def add_pin(self, p):
     self.pins.append(p)
 
+  def emit_def(self):
+    s = []
+    s.append('DEF')
+    s.append(self.name)
+    s.append(self.ref)
+    s.append('0') # always 0
+    s.append('%d' % self.ofs)
+    s.append(('N', 'Y')[self.pin_numbers])
+    s.append(('N', 'Y')[self.pin_names])
+    s.append('%d' % self.nparts)
+    s.append(('F', 'L')[self.locked])
+    s.append(('N', 'P')[self.power])
+    return ' '.join(s)
+
   def emit_head(self):
     s = []
     s.append('#\n# %s\n#' % self.name)
-    s.append('DEF') # TODO
-    s.append('F0') # TODO
-    s.append('F1') # TODO
-    s.append('F2') # TODO
-    s.append('F3') # TODO
+    s.append(self.emit_def())
+    s.extend(['F%d %s' % (i, self.text[i]) for i in range(len(self.text))])
     return '\n'.join(s)
 
   def emit_tail(self):
