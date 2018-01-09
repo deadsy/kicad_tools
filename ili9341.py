@@ -49,24 +49,20 @@ p_len = 200
 p_delta = 150
 r_extra = 100
 rw = 600
-
-def rect_height(n):
-  return (n - 1) * p_delta + (2 * r_extra)
+rh = ((len(pinset) - 1) * p_delta) + (2 * r_extra)
 
 def set_pins(unit, pinset, w, h):
   for (pin_number, pin_name, pin_type) in pinset:
     p = kicad.sch_pin('%d' % pin_number, pin_name)
     x = w/2 + p_len
     y = h/2 - r_extra - ((pin_number - 1) * p_delta)
-    p.set_xy(x, y)
+    p.ofs_xy(x, y)
     p.set_orientation('L')
     p.set_type(pin_type)
     p.set_length(p_len)
     unit.add_pin(p)
 
 #-----------------------------------------------------------------------------
-
-rh = rect_height(len(pinset))
 
 lib = kicad.sch_component(name, 'M')
 lib.get_text(0).set_bl().ofs_xy(-rw/2, rh/2 + 50)
@@ -76,5 +72,8 @@ u = kicad.sch_unit()
 u.add_shape(kicad.sch_rect(rw, rh))
 set_pins(u, pinset, rw, rh)
 lib.add_unit(u)
+
+# pin alignment
+lib.ofs_xy(0, 25)
 
 #-----------------------------------------------------------------------------

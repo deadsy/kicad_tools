@@ -27,10 +27,11 @@ class sch_pin(object):
     """set the part number"""
     self.part = p
 
-  def set_xy(self, x, y):
-    """set the x,y coordinate"""
-    self.x = x
-    self.y = y
+  def ofs_xy(self, xofs, yofs):
+    """offset the xy position"""
+    self.x += xofs
+    self.y += yofs
+    return self
 
   def set_orientation(self, o):
     """set the pin orientation"""
@@ -97,19 +98,13 @@ class sch_rect(object):
     """set the part number"""
     self.part = p
 
-  def set_xy(self, x, y):
-    self.x1 = x
-    self.y1 = y
-
-  def offset(self, x, y):
-    self.x1 += x
-    self.y1 += y
-    self.x2 += x
-    self.y2 += y
-
-  def set_size(self, w, h):
-    self.x2 = self.x1 + w
-    self.y2 = self.y1 + h
+  def ofs_xy(self, xofs, yofs):
+    """offset the xy position"""
+    self.x1 += xofs
+    self.y1 += yofs
+    self.x2 += xofs
+    self.y2 += yofs
+    return self
 
   def __str__(self):
     # S X1 Y1 X2 Y2 part dmg pen fill
@@ -209,6 +204,13 @@ class sch_unit(object):
   def add_shape(self, s):
     self.shapes.append(s)
 
+  def ofs_xy(self, xofs, yofs):
+    """offset all the pins and shapes"""
+    for x in self.shapes:
+      x.ofs_xy(xofs, yofs)
+    for x in self.pins:
+      x.ofs_xy(xofs, yofs)
+
   def __str__(self):
     s = []
     s.extend([str(x) for x in self.shapes])
@@ -243,6 +245,13 @@ class sch_component(object):
     self.units.append(u)
     self.nparts += 1
 
+  def ofs_xy(self, xofs, yofs):
+    """offset the component"""
+    for x in self.units:
+      x.ofs_xy(xofs, yofs)
+    for x in self.text:
+      x.ofs_xy(xofs, yofs)
+
   def emit_def(self):
     s = []
     s.append('DEF')
@@ -267,7 +276,6 @@ class sch_component(object):
   def emit_tail(self):
     s = []
     s.append('ENDDEF')
-    s.append('#')
     return '\n'.join(s)
 
   def emit_draw(self):
@@ -306,7 +314,7 @@ class sch_lib(object):
 
   def emit_tail(self):
     s = []
-    s.append('#End Library')
+    s.append('#\n#End Library')
     return '\n'.join(s)
 
   def __str__(self):

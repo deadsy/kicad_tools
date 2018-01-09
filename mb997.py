@@ -139,7 +139,7 @@ def set_pins(unit, pinset, prefix, w, h):
     p = kicad.sch_pin('%d.%d' % (prefix, pin_number), pin_name)
     x = (-w/2 - p_len, w/2 + p_len)[pin_number & 1 == 0]
     y = h/2 - r_extra + ((pin_number - 1) >> 1) * -p_delta
-    p.set_xy(x, y)
+    p.ofs_xy(x, y)
     p.set_orientation(('R', 'L')[pin_number % 2 == 0])
     p.set_type(pin_type)
     p.set_length(p_len)
