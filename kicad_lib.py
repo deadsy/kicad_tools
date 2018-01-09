@@ -1,7 +1,10 @@
 #-----------------------------------------------------------------------------
 """
 
-KiCAD Library Objects
+KiCAD LIB Objects
+
+Generate the *.lib file defining the schematic symbol.
+Generate the *.dcm file defining the part information.
 
 """
 #-----------------------------------------------------------------------------

@@ -6,7 +6,7 @@ MB997 - STM32F4 Discovery Board
 """
 #-----------------------------------------------------------------------------
 
-import kicad
+import kicad_lib
 
 #-----------------------------------------------------------------------------
 
@@ -122,7 +122,7 @@ pinset2 = (
 
 #-----------------------------------------------------------------------------
 
-dcm = kicad.doc_component(name, 'STM32F4 Discovery Board')
+dcm = kicad_lib.doc_component(name, 'STM32F4 Discovery Board')
 dcm.add_keywords((name, 'STM32', 'STM32F4', 'STM32F407', 'Discovery',))
 
 #-----------------------------------------------------------------------------
@@ -136,7 +136,7 @@ rw = 800
 
 def set_pins(unit, pinset, prefix, w, h):
   for (pin_number, pin_name, pin_type) in pinset:
-    p = kicad.sch_pin('%d.%d' % (prefix, pin_number), pin_name)
+    p = kicad_lib.sch_pin('%d.%d' % (prefix, pin_number), pin_name)
     x = (-w/2 - p_len, w/2 + p_len)[pin_number & 1 == 0]
     y = h/2 - r_extra + ((pin_number - 1) >> 1) * -p_delta
     p.ofs_xy(x, y)
@@ -147,17 +147,17 @@ def set_pins(unit, pinset, prefix, w, h):
 
 #-----------------------------------------------------------------------------
 
-lib = kicad.sch_component(name, 'M')
+lib = kicad_lib.sch_component(name, 'M')
 lib.get_text(0).set_bl().ofs_xy(-rw/2, rh/2 + 50)
 lib.get_text(1).set_tl().ofs_xy(-rw/2, -rh/2 - 50)
 
-u = kicad.sch_unit()
-u.add_shape(kicad.sch_rect(rw, rh))
+u = kicad_lib.sch_unit()
+u.add_shape(kicad_lib.sch_rect(rw, rh))
 set_pins(u, pinset1, 1, rw, rh)
 lib.add_unit(u)
 
-u = kicad.sch_unit()
-u.add_shape(kicad.sch_rect(rw, rh))
+u = kicad_lib.sch_unit()
+u.add_shape(kicad_lib.sch_rect(rw, rh))
 set_pins(u, pinset2, 2, rw, rh)
 lib.add_unit(u)
 
