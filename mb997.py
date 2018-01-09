@@ -10,142 +10,155 @@ import kicad
 
 #-----------------------------------------------------------------------------
 
-pins = (
-  # connector, pin, name, type
-  # P1 Side
-  (1, 1, 'GND', 'P'),
-  (1, 3, 'VDD', 'W'),
-  (1, 5, 'GND', 'P'),
-  (1, 7, 'PC1', 'B'),
-  (1, 9, 'PC3', 'B'),
-  (1, 11, 'PA1', 'B'),
-  (1, 13, 'PA3', 'B'),
-  (1, 15, 'PA5', 'B'),
-  (1, 17, 'PA7', 'B'),
-  (1, 19, 'PC5', 'B'),
-  (1, 21, 'PB1', 'B'),
-  (1, 23, 'GND', 'P'),
-  (1, 25, 'PE7', 'B'),
-  (1, 27, 'PE9', 'B'),
-  (1, 29, 'PE11', 'B'),
-  (1, 31, 'PE13', 'B'),
-  (1, 33, 'PE15', 'B'),
-  (1, 35, 'PB11', 'B'),
-  (1, 37, 'PB13', 'B'),
-  (1, 39, 'PB15', 'B'),
-  (1, 41, 'PD9', 'B'),
-  (1, 43, 'PD11', 'B'),
-  (1, 45, 'PD13', 'B'),
-  (1, 47, 'PD15', 'B'),
-  (1, 49, 'GND', 'P'),
-  (1, 2, 'GND', 'P'),
-  (1, 4, 'VDD', 'W'),
-  (1, 6, 'NRST', 'I'),
-  (1, 8, 'PC0', 'B'),
-  (1, 10, 'PC2', 'B'),
-  (1, 12, 'PA0', 'B'),
-  (1, 14, 'PA2', 'B'),
-  (1, 16, 'PA4', 'B'),
-  (1, 18, 'PA6', 'B'),
-  (1, 20, 'PC4', 'B'),
-  (1, 22, 'PB0', 'B'),
-  (1, 24, 'PB2', 'B'),
-  (1, 26, 'PE8', 'B'),
-  (1, 28, 'PE10', 'B'),
-  (1, 30, 'PE12', 'B'),
-  (1, 32, 'PE14', 'B'),
-  (1, 34, 'PB10', 'B'),
-  (1, 36, 'PB12', 'B'),
-  (1, 38, 'PB14', 'B'),
-  (1, 40, 'PD8', 'B'),
-  (1, 42, 'PD10', 'B'),
-  (1, 44, 'PD12', 'B'),
-  (1, 46, 'PD14', 'B'),
-  (1, 48, 'NC', 'N'),
-  (1, 50, 'GND', 'P'),
-  # P2 Side
-  (2, 1, 'GND', 'P'),
-  (2, 3, '5V', 'W'),
-  (2, 5, '3V', 'W'),
-  (2, 7, 'PH0', 'B'),
-  (2, 9, 'PC14', 'B'),
-  (2, 11, 'PE6', 'B'),
-  (2, 13, 'PE4', 'B'),
-  (2, 15, 'PE2', 'B'),
-  (2, 17, 'PE0', 'B'),
-  (2, 19, 'PB8', 'B'),
-  (2, 21, 'BOOT0', 'I'),
-  (2, 23, 'PB6', 'B'),
-  (2, 25, 'PB4', 'B'),
-  (2, 27, 'PD7', 'B'),
-  (2, 29, 'PD5', 'B'),
-  (2, 31, 'PD3', 'B'),
-  (2, 33, 'PD1', 'B'),
-  (2, 35, 'PC12', 'B'),
-  (2, 37, 'PC10', 'B'),
-  (2, 39, 'PA14', 'B'),
-  (2, 41, 'PA10', 'B'),
-  (2, 43, 'PA8', 'B'),
-  (2, 45, 'PC8', 'B'),
-  (2, 47, 'PC6', 'B'),
-  (2, 49, 'GND', 'P'),
-  (2, 2, 'GND', 'P'),
-  (2, 4, '5V', 'W'),
-  (2, 6, '3V', 'W'),
-  (2, 8, 'PH1', 'B'),
-  (2, 10, 'PC15', 'B'),
-  (2, 12, 'PC13', 'B'),
-  (2, 14, 'PE5', 'B'),
-  (2, 16, 'PE3', 'B'),
-  (2, 18, 'PE1', 'B'),
-  (2, 20, 'PB9', 'B'),
-  (2, 22, 'VDD', 'W'),
-  (2, 24, 'PB7', 'B'),
-  (2, 26, 'PB5', 'B'),
-  (2, 28, 'PB3', 'B'),
-  (2, 30, 'PD6', 'B'),
-  (2, 32, 'PD4', 'B'),
-  (2, 34, 'PD2', 'B'),
-  (2, 36, 'PD0', 'B'),
-  (2, 38, 'PC11', 'B'),
-  (2, 40, 'PA15', 'B'),
-  (2, 42, 'PA13', 'B'),
-  (2, 44, 'PA9', 'B'),
-  (2, 46, 'PC9', 'B'),
-  (2, 48, 'PC7', 'B'),
-  (2, 50, 'GND', 'P'),
+name = 'MB997'
+
+# P1 Side (number, name, type)
+pinset1 = (
+  (1, 'GND', 'W'),
+  (3, 'VDD', 'w'),
+  (5, 'GND', 'W'),
+  (7, 'PC1', 'B'),
+  (9, 'PC3', 'B'),
+  (11, 'PA1', 'B'),
+  (13, 'PA3', 'B'),
+  (15, 'PA5', 'B'),
+  (17, 'PA7', 'B'),
+  (19, 'PC5', 'B'),
+  (21, 'PB1', 'B'),
+  (23, 'GND', 'W'),
+  (25, 'PE7', 'B'),
+  (27, 'PE9', 'B'),
+  (29, 'PE11', 'B'),
+  (31, 'PE13', 'B'),
+  (33, 'PE15', 'B'),
+  (35, 'PB11', 'B'),
+  (37, 'PB13', 'B'),
+  (39, 'PB15', 'B'),
+  (41, 'PD9', 'B'),
+  (43, 'PD11', 'B'),
+  (45, 'PD13', 'B'),
+  (47, 'PD15', 'B'),
+  (49, 'GND', 'W'),
+  (2, 'GND', 'W'),
+  (4, 'VDD', 'w'),
+  (6, 'NRST', 'I'),
+  (8, 'PC0', 'B'),
+  (10, 'PC2', 'B'),
+  (12, 'PA0', 'B'),
+  (14, 'PA2', 'B'),
+  (16, 'PA4', 'B'),
+  (18, 'PA6', 'B'),
+  (20, 'PC4', 'B'),
+  (22, 'PB0', 'B'),
+  (24, 'PB2', 'B'),
+  (26, 'PE8', 'B'),
+  (28, 'PE10', 'B'),
+  (30, 'PE12', 'B'),
+  (32, 'PE14', 'B'),
+  (34, 'PB10', 'B'),
+  (36, 'PB12', 'B'),
+  (38, 'PB14', 'B'),
+  (40, 'PD8', 'B'),
+  (42, 'PD10', 'B'),
+  (44, 'PD12', 'B'),
+  (46, 'PD14', 'B'),
+  (48, 'NC', 'N'),
+  (50, 'GND', 'W'),
 )
 
-ph = 25 # height in pins
-rh = (ph - 1) * 200 + (2 * 100)
+# P2 Side (number, name, type)
+pinset2 = (
+  (1, 'GND', 'W'),
+  (3, '5V', 'w'),
+  (5, '3V', 'w'),
+  (7, 'PH0', 'B'),
+  (9, 'PC14', 'B'),
+  (11, 'PE6', 'B'),
+  (13, 'PE4', 'B'),
+  (15, 'PE2', 'B'),
+  (17, 'PE0', 'B'),
+  (19, 'PB8', 'B'),
+  (21, 'BOOT0', 'I'),
+  (23, 'PB6', 'B'),
+  (25, 'PB4', 'B'),
+  (27, 'PD7', 'B'),
+  (29, 'PD5', 'B'),
+  (31, 'PD3', 'B'),
+  (33, 'PD1', 'B'),
+  (35, 'PC12', 'B'),
+  (37, 'PC10', 'B'),
+  (39, 'PA14', 'B'),
+  (41, 'PA10', 'B'),
+  (43, 'PA8', 'B'),
+  (45, 'PC8', 'B'),
+  (47, 'PC6', 'B'),
+  (49, 'GND', 'W'),
+  (2, 'GND', 'W'),
+  (4, '5V', 'w'),
+  (6, '3V', 'w'),
+  (8, 'PH1', 'B'),
+  (10, 'PC15', 'B'),
+  (12, 'PC13', 'B'),
+  (14, 'PE5', 'B'),
+  (16, 'PE3', 'B'),
+  (18, 'PE1', 'B'),
+  (20, 'PB9', 'B'),
+  (22, 'VDD', 'w'),
+  (24, 'PB7', 'B'),
+  (26, 'PB5', 'B'),
+  (28, 'PB3', 'B'),
+  (30, 'PD6', 'B'),
+  (32, 'PD4', 'B'),
+  (34, 'PD2', 'B'),
+  (36, 'PD0', 'B'),
+  (38, 'PC11', 'B'),
+  (40, 'PA15', 'B'),
+  (42, 'PA13', 'B'),
+  (44, 'PA9', 'B'),
+  (46, 'PC9', 'B'),
+  (48, 'PC7', 'B'),
+  (50, 'GND', 'W'),
+)
+
+#-----------------------------------------------------------------------------
+
+dcm = kicad.doc_component(name, 'STM32F4 Discovery Board')
+dcm.add_keywords((name, 'STM32', 'STM32F4', 'STM32F407', 'Discovery',))
+
+#-----------------------------------------------------------------------------
+
+p_len = 200
+p_delta = 150
+r_extra = 100
+p_height = len(pinset1) / 2
+rh = (p_height - 1) * p_delta + (2 * r_extra)
 rw = 800
 
-dcm = kicad.doc_component('MB997', 'STM32F4 Discovery Board')
-dcm.add_keywords(('STM32', 'STM32F4', 'STM32F407', 'Discovery',))
+def set_pins(unit, pinset, prefix, w, h):
+  for (pin_number, pin_name, pin_type) in pinset:
+    p = kicad.sch_pin('%d.%d' % (prefix, pin_number), pin_name)
+    x = (-w/2 - p_len, w/2 + p_len)[pin_number & 1 == 0]
+    y = h/2 - r_extra + ((pin_number - 1) >> 1) * -p_delta
+    p.set_xy(x, y)
+    p.set_orientation(('R', 'L')[pin_number % 2 == 0])
+    p.set_type(pin_type)
+    p.set_length(p_len)
+    unit.add_pin(p)
 
-lib = kicad.sch_component('MB997', 'U')
+#-----------------------------------------------------------------------------
 
-r0 = kicad.sch_rect(rw, rh)
-r0.offset(-800, 0)
-lib.add_shape(r0)
+lib = kicad.sch_component(name, 'M')
+lib.get_text(0).set_bl().ofs_xy(-rw/2, rh/2 + 50)
+lib.get_text(1).set_tl().ofs_xy(-rw/2, -rh/2 - 50)
 
-r1 = kicad.sch_rect(rw, rh)
-r1.offset(800, 0)
-lib.add_shape(r1)
+u = kicad.sch_unit()
+u.add_shape(kicad.sch_rect(rw, rh))
+set_pins(u, pinset1, 1, rw, rh)
+lib.add_unit(u)
 
-for (connector, pin_number, pin_name, pin_type) in pins:
-  p = kicad.sch_pin('%d.%d' % (connector, pin_number), pin_name)
-  if connector == 1:
-    x = 0
-  if connector == 2:
-    x = 1500
-  if pin_number % 2 == 0:
-    x += 800
-  y = ((pin_number - 1) >> 1) * -200
-  p.set_xy(x, y)
-  p.set_orientation(('R', 'L')[pin_number % 2 == 0])
-  p.set_type(pin_type)
-  p.set_length(150)
-  lib.add_pin(p)
+u = kicad.sch_unit()
+u.add_shape(kicad.sch_rect(rw, rh))
+set_pins(u, pinset2, 2, rw, rh)
+lib.add_unit(u)
 
 #-----------------------------------------------------------------------------

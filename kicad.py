@@ -23,6 +23,10 @@ class sch_pin(object):
     self.x = 0
     self.y = 0
 
+  def set_part(self, p):
+    """set the part number"""
+    self.part = p
+
   def set_xy(self, x, y):
     """set the x,y coordinate"""
     self.x = x
@@ -89,6 +93,10 @@ class sch_rect(object):
     self.pen = 0
     self.fill = 'N'
 
+  def set_part(self, p):
+    """set the part number"""
+    self.part = p
+
   def set_xy(self, x, y):
     self.x1 = x
     self.y1 = y
@@ -131,9 +139,33 @@ class sch_text(object):
     self.x = 0
     self.y = 0
 
-  def set_xy(self, x, y):
-    self.x = x
-    self.y = y
+  def set_halign(self, a):
+    assert a in ('C','L','R'), 'bad horizontal alignment %s' % a
+    self.halign = a
+    return self
+
+  def set_valign(self, a):
+    assert a in ('C','T','B'), 'bad vertical alignment %s' % a
+    self.valign = a
+    return self
+
+  def set_tl(self):
+    """set the text origin to the top left point"""
+    self.valign = 'T'
+    self.halign = 'L'
+    return self
+
+  def set_bl(self):
+    """set the text origin to the bottom left point"""
+    self.valign = 'B'
+    self.halign = 'L'
+    return self
+
+  def ofs_xy(self, xofs, yofs):
+    """offset the xy position"""
+    self.x += xofs
+    self.y += yofs
+    return self
 
   def set_orientation(self, o):
     """set the text orientation"""
@@ -143,6 +175,7 @@ class sch_text(object):
       )
     assert o in o_vals, 'bad text orientation %s' % o
     self.orientation = o
+    return self
 
   def __str__(self):
     s = []
@@ -164,11 +197,23 @@ class sch_unit(object):
     self.pins = []
     self.shapes = []
 
+  def set_part(self, p):
+    for x in self.shapes:
+      x.set_part(p)
+    for x in self.pins:
+      x.set_part(p)
+
   def add_pin(self, p):
     self.pins.append(p)
 
   def add_shape(self, s):
     self.shapes.append(s)
+
+  def __str__(self):
+    s = []
+    s.extend([str(x) for x in self.shapes])
+    s.extend([str(x) for x in self.pins])
+    return '\n'.join(s)
 
 #-----------------------------------------------------------------------------
 
@@ -180,11 +225,10 @@ class sch_component(object):
     self.ofs = 50
     self.pin_names = True
     self.pin_numbers = True
-    self.nparts = 1
-    self.locked = False
+    self.nparts = 0
+    self.locked = True
     self.power = False
-    self.pins = []
-    self.shapes = []
+    self.units = []
     self.text = (
       sch_text(self.ref), # F0 reference
       sch_text(self.name), # F1 component name
@@ -192,11 +236,12 @@ class sch_component(object):
       sch_text(""), # F3 relative path to datasheet
     )
 
-  def add_pin(self, p):
-    self.pins.append(p)
+  def get_text(self, i):
+    return self.text[i]
 
-  def add_shape(self, s):
-    self.shapes.append(s)
+  def add_unit(self, u):
+    self.units.append(u)
+    self.nparts += 1
 
   def emit_def(self):
     s = []
@@ -228,12 +273,13 @@ class sch_component(object):
   def emit_draw(self):
     s = []
     s.append('DRAW')
-    s.extend([str(x) for x in self.shapes])
-    s.extend([str(x) for x in self.pins])
+    s.extend([str(x) for x in self.units])
     s.append('ENDDRAW')
     return '\n'.join(s)
 
   def __str__(self):
+    for i, x in enumerate(self.units):
+      x.set_part(i + 1)
     s = []
     s.append(self.emit_head())
     s.append(self.emit_draw())
