@@ -10,9 +10,13 @@ mod - part pcb footprint
 """
 #-----------------------------------------------------------------------------
 
+import time
+
+#-----------------------------------------------------------------------------
+
 def indent(s):
   items = s.split('\n')
-  for i in range(len(items)):
+  for i, _ in enumerate(items):
     items[i] = '  %s' % items[i]
   return '\n'.join(items)
 
@@ -20,6 +24,10 @@ MM_PER_INCH = 25.4
 
 def mil2mm(mil):
   return MM_PER_INCH * (mil / 1000.0)
+
+def tedit_secs():
+  """return number of seconds since 1970/1/1"""
+  return int(time.time())
 
 #-----------------------------------------------------------------------------
 
@@ -213,7 +221,6 @@ class mod_module(object):
     self.attr = None
     # TODO
     # locked
-    # tedit
     # autoplace_cost90
     # autoplace_cost180
     # solder_mask_margin
@@ -246,7 +253,7 @@ class mod_module(object):
 
   def __str__(self):
     s = []
-    s.append('(module %s (layer %s)' % (self.name, self.layer))
+    s.append('(module %s (layer %s) (tedit %x)' % (self.name, self.layer, tedit_secs()))
     s.append(indent('(descr %s)' % self.descr))
     s.append(indent('(tags %s)' % self.tags_str()))
     if self.attr:
@@ -400,12 +407,14 @@ class lib_text(object):
     self.y = 0
 
   def set_halign(self, a):
-    assert a in ('C','L','R'), 'bad horizontal alignment %s' % a
+    """set horizontal alignment"""
+    assert a in ('C', 'L', 'R'), 'bad horizontal alignment %s' % a
     self.halign = a
     return self
 
   def set_valign(self, a):
-    assert a in ('C','T','B'), 'bad vertical alignment %s' % a
+    """set vertical alignment"""
+    assert a in ('C', 'T', 'B'), 'bad vertical alignment %s' % a
     self.valign = a
     return self
 
