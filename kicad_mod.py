@@ -53,7 +53,7 @@ Generate the *.kicad_mod files defining the PCB footprint
 
 #-----------------------------------------------------------------------------
 
-class at(object):
+class km_at(object):
 
   def __init__(self, x=0.0, y=0.0, a=0.0):
     self.x = x
@@ -68,7 +68,7 @@ class at(object):
 
 #-----------------------------------------------------------------------------
 
-class size(object):
+class km_size(object):
 
   def __init__(self, w=0.0, h=0.0):
     self.w = w
@@ -79,25 +79,75 @@ class size(object):
 
 #-----------------------------------------------------------------------------
 
+class km_rect_delta(object):
+
+  def __init__(self, dx=0.0, dy=0.0):
+    self.dx = dx
+    self.dy = dy
+
+  def __str__(self):
+    return '(rect_delta %.2f %.2f)' % (self.dy, self.dx)
+
+#-----------------------------------------------------------------------------
+
+class km_drill(object):
+
+  def __init__(self, size=0.0, xofs=0.0, yofs=0.0):
+    self.size = size
+    self.xofs = xofs
+    self.yofs = yofs
+
+  def __str__(self):
+    if (self.xofs != 0.0) or (self.yofs != 0.0):
+      return '(drill %.2f (offset %.2f %.2f))' % (self.size, self.xofs, self.yofs)
+    else:
+      return '(drill %.2f)' % self.size
+
+#-----------------------------------------------------------------------------
+
+class km_layers(object):
+
+  def __init__(self, layers=None):
+    self.layers = layers
+
+  def __str__(self):
+    if self.layers:
+      s = [x for x in self.layers]
+      return '(layers %s)' % ' '.join(s)
+    else:
+      return ''
+
+#-----------------------------------------------------------------------------
+
 ptypes = ('thru_hole', 'smd', 'connect', 'np_thru_hole')
 pshapes = ('circle', 'rect', 'oval', 'trapezoid')
 
-class pad(object):
+class km_pad(object):
 
   def __init__(self, name, ptype='smd', shape='rect'):
+    assert ptype in ptypes, 'bad pad type %s' % ptype
+    assert shape in pshapes, 'bad pad shape %s' % shape
     self.name = name # pin number or name (string)
     self.ptype = ptype # pad type
     self.shape = shape
-    self.at = at()
-    self.size = size()
-
-  def set_type(self, t):
-    assert t in ptypes, 'bad pad type %s' % t
-    self.ptype = t
-
-  def set_shape(self, s):
-    assert s in pshapes, 'bad pad shape %s' % s
-    self.shape = s
+    self.at = km_at()
+    self.size = km_size()
+    self.rect_delta = km_rect_delta()
+    self.drill = km_drill()
+    if self.ptype in ('thru_hole', 'np_thru_hole'):
+      self.layers = km_layers(('*.Cu', '*.Mask', 'F.SilkS'))
+    else:
+      self.layers = km_layers(('F.Cu', 'F.Paste', 'F.Mask'))
+    # TODO
+    # drill oval
+    # die_length
+    # solder_mask
+    # clearance
+    # solder_paste
+    # solder_paste_margin_ratio
+    # zone_connect
+    # thermal_width
+    # thermal_gap
 
   def __str__(self):
     s = []
@@ -106,12 +156,52 @@ class pad(object):
     s.append('%s' % self.shape)
     s.append(str(self.at))
     s.append(str(self.size))
+    if self.shape == 'trapezoid':
+      s.append(str(self.rect_delta))
+    if self.ptype in ('thru_hole', 'np_thru_hole'):
+      s.append(str(self.drill))
+    s.append(str(self.layers))
     return '(pad %s)' % ' '.join(s)
 
 #-----------------------------------------------------------------------------
 
+class km_module(object):
+
+  def __init__(self):
+    pass
+    # TODO
+    # locked
+    # layer
+    # tedit
+    # attr
+    # descr
+    # tags
+    # autoplace_cost90
+    # autoplace_cost180
+    # solder_mask_margin
+    # solder_paste_margin
+    # solder_paste_margin_ratio
+    # clearance
+    # zone_connect
+    # thermal_width
+    # thermal_gap
+    # fp_text
+    # fp_line
+    # fp_circle
+    # fp_arc
+    # fp_poly
+    # fp_curve
+    # model
+
+  def __str__(self):
+    s = []
+    return '(module %s)' % ' '.join(s)
+
+#-----------------------------------------------------------------------------
+
+
 def main():
-  x = pad('1')
+  x = km_pad('10', ptype='smd', shape='rect')
   print x
 
 main()
