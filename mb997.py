@@ -127,12 +127,13 @@ pinset2 = (
 
 dcm = kicad.dcm_component(name, descr)
 dcm.add_keywords(tags)
+dcm.add_url('http://www.st.com/en/evaluation-tools/stm32f4discovery.html')
 
 #-----------------------------------------------------------------------------
 # schematic symbol
 
 p_len = 200
-p_delta = 150
+p_delta = 100
 r_extra = 100
 p_height = len(pinset1) / 2
 rh = (p_height - 1) * p_delta + (2 * r_extra)

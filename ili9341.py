@@ -45,12 +45,13 @@ pinset = (
 
 dcm = kicad.dcm_component(name, descr)
 dcm.add_keywords(tags)
+dcm.add_url('https://www.amazon.com/gp/product/B017FZTIO6/ref=od_aui_detailpages00?ie=UTF8&psc=1')
 
 #-----------------------------------------------------------------------------
 # schematic symbol
 
 p_len = 200
-p_delta = 150
+p_delta = 100
 r_extra = 100
 rw = 600
 rh = ((len(pinset) - 1) * p_delta) + (2 * r_extra)
@@ -76,7 +77,7 @@ set_pins(u, pinset, rw, rh)
 lib.add_unit(u)
 
 # pin alignment
-lib.ofs_xy(0, 25)
+lib.ofs_xy(0, 50)
 
 #-----------------------------------------------------------------------------
 # pcb footprint

@@ -356,7 +356,7 @@ class lib_rect(object):
     self.y2 = h/2
     self.part = 0
     self.dmg = 0
-    self.pen = 0
+    self.pen = 10
     self.fill = 'N'
 
   def set_part(self, p):
@@ -599,15 +599,21 @@ class dcm_component(object):
     self.name = name
     self.description = descr
     self.keywords = []
+    self.url = None
 
   def add_keywords(self, k):
     self.keywords.extend(k)
+
+  def add_url(self, url):
+    self.url = url
 
   def __str__(self):
     s = []
     s.append('#\n$CMP %s' % self.name)
     s.append('D %s' % self.description)
     s.append('K %s' % ' '.join([x for x in self.keywords]))
+    if self.url:
+      s.append('F %s' % self.url)
     s.append('$ENDCMP')
     return '\n'.join(s)
 

@@ -1,4 +1,8 @@
 
+KICAD_UTILS = /home/jasonh/work/jasonh/kicad-library-utils
+CHKLIB = $(KICAD_UTILS)/schlib/checklib.py
+CHKMOD = $(KICAD_UTILS)/pcb/check_kicad_mod.py
+
 DST = /home/jasonh/work/googoomuck/hw
 
 LIB = ggm.lib
@@ -12,6 +16,12 @@ all:
 	cp $(LIB) $(DST)
 	cp $(DCM) $(DST)
 	cp *.kicad_mod $(MOD)
+
+libtest:
+	$(CHKLIB) -vv ggm.lib
+
+modtest:
+	$(CHKMOD) -vv *.kicad_mod
 
 clean:
 	-rm $(LIB)
