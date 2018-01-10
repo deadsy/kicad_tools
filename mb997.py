@@ -6,11 +6,13 @@ MB997 - STM32F4 Discovery Board
 """
 #-----------------------------------------------------------------------------
 
-import kicad_lib
+import kicad
 
 #-----------------------------------------------------------------------------
 
 name = 'MB997'
+descr = 'STM32F4 Discovery Board'
+tags = (name, 'STM32', 'STM32F4', 'STM32F407', 'Discovery',)
 
 # P1 Side (number, name, type)
 pinset1 = (
@@ -121,11 +123,13 @@ pinset2 = (
 )
 
 #-----------------------------------------------------------------------------
+# part documentation
 
-dcm = kicad_lib.doc_component(name, 'STM32F4 Discovery Board')
-dcm.add_keywords((name, 'STM32', 'STM32F4', 'STM32F407', 'Discovery',))
+dcm = kicad.dcm_component(name, descr)
+dcm.add_keywords(tags)
 
 #-----------------------------------------------------------------------------
+# schematic symbol
 
 p_len = 200
 p_delta = 150
@@ -136,7 +140,7 @@ rw = 800
 
 def set_pins(unit, pinset, prefix, w, h):
   for (pin_number, pin_name, pin_type) in pinset:
-    p = kicad_lib.sch_pin('%d.%d' % (prefix, pin_number), pin_name)
+    p = kicad.lib_pin('%d.%d' % (prefix, pin_number), pin_name)
     x = (-w/2 - p_len, w/2 + p_len)[pin_number & 1 == 0]
     y = h/2 - r_extra + ((pin_number - 1) >> 1) * -p_delta
     p.ofs_xy(x, y)
@@ -145,20 +149,34 @@ def set_pins(unit, pinset, prefix, w, h):
     p.set_length(p_len)
     unit.add_pin(p)
 
-#-----------------------------------------------------------------------------
-
-lib = kicad_lib.sch_component(name, 'M')
+lib = kicad.lib_component(name, 'M')
 lib.get_text(0).set_bl().ofs_xy(-rw/2, rh/2 + 50)
 lib.get_text(1).set_tl().ofs_xy(-rw/2, -rh/2 - 50)
 
-u = kicad_lib.sch_unit()
-u.add_shape(kicad_lib.sch_rect(rw, rh))
+u = kicad.lib_unit()
+u.add_shape(kicad.lib_rect(rw, rh))
 set_pins(u, pinset1, 1, rw, rh)
 lib.add_unit(u)
 
-u = kicad_lib.sch_unit()
-u.add_shape(kicad_lib.sch_rect(rw, rh))
+u = kicad.lib_unit()
+u.add_shape(kicad.lib_rect(rw, rh))
 set_pins(u, pinset2, 2, rw, rh)
 lib.add_unit(u)
+
+#-----------------------------------------------------------------------------
+# pcb footprint
+
+mod = kicad.mod_module(name, descr)
+mod.add_tags(tags)
+
+t = kicad.mod_text('REF**', 'reference')
+t.set_layer('F.SilkS')
+mod.add_text(t)
+
+t = kicad.mod_text(name, 'value')
+t.set_layer('F.Fab')
+mod.add_text(t)
+
+mod.add_pad(kicad.mod_pad('10', ptype='smd', shape='rect'))
 
 #-----------------------------------------------------------------------------

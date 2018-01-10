@@ -22,7 +22,7 @@ def print_usage(argv):
   print 'Usage: %s [options]' % argv[0]
   print 'Options:'
   print '%-18s%s' % ('-i <input_file>', 'input file')
-  print '%-18s%s' % ('-t [dcm,lib]', 'output type')
+  print '%-18s%s' % ('-t [dcm,lib,mod]', 'output type')
 
 def error(msg, usage=False):
   print 'error: %s' % msg
@@ -54,7 +54,7 @@ def process_options(argv):
   if not _ifile:
     error('specify an input file', True)
 
-  if _otype not in ('dcm', 'lib'):
+  if _otype not in ('dcm', 'lib', 'mod'):
     error('specify an output type', True)
 
 #-----------------------------------------------------------------------------
@@ -70,6 +70,11 @@ def main():
     print module.dcm
   if _otype == 'lib':
     print module.lib
+  if _otype == 'mod':
+    for m in module.mod.modules:
+      f = open('%s.kicad_mod' % m.name, 'w')
+      f.write(str(m))
+      f.close()
 
 main()
 

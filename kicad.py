@@ -1,15 +1,275 @@
 #-----------------------------------------------------------------------------
 """
 
-KiCAD LIB Objects
+KiCAD Objects
 
-Generate the *.lib file defining the schematic symbol.
-Generate the *.dcm file defining the part information.
+lib - schematic symbols
+dcm - part information
+mod - part pcb footprint
 
 """
 #-----------------------------------------------------------------------------
 
-class sch_pin(object):
+def indent(s):
+  items = s.split('\n')
+  for i in range(len(items)):
+    items[i] = '  %s' % items[i]
+  return '\n'.join(items)
+
+MM_PER_INCH = 25.4
+
+def mil2mm(mil):
+  return MM_PER_INCH * (mil / 1000.0)
+
+#-----------------------------------------------------------------------------
+
+class mod_at(object):
+  """footprint add"""
+
+  def __init__(self, x=0.0, y=0.0, a=0.0):
+    self.x = x
+    self.y = y
+    self.a = a
+
+  def ofs_xy(self, xofs, yofs):
+    """offset the xy position"""
+    self.x += float(xofs)
+    self.y += float(yofs)
+
+  def __str__(self):
+    if self.a == 0:
+      return '(at %.2f %.2f)' % (self.x, self.y)
+    else:
+      return '(at %.2f %.2f %.2f)' % (self.x, self.y, self.a)
+
+#-----------------------------------------------------------------------------
+
+class mod_size(object):
+  """footprint size"""
+
+  def __init__(self, w=0.0, h=0.0):
+    self.w = w
+    self.h = h
+
+  def __str__(self):
+    return '(size %.2f %.2f)' % (self.w, self.h)
+
+#-----------------------------------------------------------------------------
+
+class mod_rect_delta(object):
+  """footprint rect_delta"""
+
+  def __init__(self, dx=0.0, dy=0.0):
+    self.dx = dx
+    self.dy = dy
+
+  def __str__(self):
+    return '(rect_delta %.2f %.2f)' % (self.dy, self.dx)
+
+#-----------------------------------------------------------------------------
+
+class mod_drill(object):
+  """footprint drill"""
+
+  def __init__(self, size=0.0, xofs=0.0, yofs=0.0):
+    self.size = size
+    self.xofs = xofs
+    self.yofs = yofs
+
+  def __str__(self):
+    if (self.xofs != 0.0) or (self.yofs != 0.0):
+      return '(drill %.2f (offset %.2f %.2f))' % (self.size, self.xofs, self.yofs)
+    else:
+      return '(drill %.2f)' % self.size
+
+#-----------------------------------------------------------------------------
+
+class mod_layers(object):
+  """footprint layers"""
+
+  def __init__(self, layers=None):
+    self.layers = layers
+
+  def __str__(self):
+    if self.layers:
+      s = [x for x in self.layers]
+      return '(layers %s)' % ' '.join(s)
+    else:
+      return ''
+
+#-----------------------------------------------------------------------------
+
+ptypes = ('thru_hole', 'smd', 'connect', 'np_thru_hole')
+pshapes = ('circle', 'rect', 'oval', 'trapezoid')
+
+class mod_pad(object):
+  """footprint pad"""
+
+  def __init__(self, name, ptype='smd', shape='rect'):
+    assert ptype in ptypes, 'bad pad type %s' % ptype
+    assert shape in pshapes, 'bad pad shape %s' % shape
+    self.name = name # pin number or name (string)
+    self.ptype = ptype # pad type
+    self.shape = shape
+    self.at = mod_at()
+    self.size = mod_size()
+    self.rect_delta = mod_rect_delta()
+    self.drill = mod_drill()
+    if self.ptype in ('thru_hole', 'np_thru_hole'):
+      self.layers = mod_layers(('*.Cu', '*.Mask', 'F.SilkS'))
+    else:
+      self.layers = mod_layers(('F.Cu', 'F.Paste', 'F.Mask'))
+    # TODO
+    # drill oval
+    # die_length
+    # solder_mask
+    # clearance
+    # solder_paste
+    # solder_paste_margin_ratio
+    # zone_connect
+    # thermal_width
+    # thermal_gap
+
+  def __str__(self):
+    s = []
+    s.append('%s' % self.name)
+    s.append('%s' % self.ptype)
+    s.append('%s' % self.shape)
+    s.append(str(self.at))
+    s.append(str(self.size))
+    if self.shape == 'trapezoid':
+      s.append(str(self.rect_delta))
+    if self.ptype in ('thru_hole', 'np_thru_hole'):
+      s.append(str(self.drill))
+    s.append(str(self.layers))
+    return '(pad %s)' % ' '.join(s)
+
+#-----------------------------------------------------------------------------
+
+class mod_font(object):
+
+  def __init__(self):
+    self.size = mod_size(1.0, 1.0)
+    self.thickness = 0.15
+
+  def __str__(self):
+    return '(font %s (thickness %.2f))' % (self.size, self.thickness)
+
+#-----------------------------------------------------------------------------
+
+class mod_effects(object):
+
+  def __init__(self):
+    self.font = mod_font()
+
+  def __str__(self):
+    s = []
+    s.append(str(self.font))
+    return '(effects %s)' % ' '.join(s)
+
+#-----------------------------------------------------------------------------
+
+ttypes = ('reference', 'value', 'user')
+
+class mod_text(object):
+
+  def __init__(self, text, ttype):
+    assert ttype in ttypes, 'bad ttype %s' % ttype
+    self.text = text
+    self.ttype = ttype
+    self.at = mod_at()
+    self.layer = 'F.SilkS'
+    self.effects = mod_effects()
+
+  def ofs_xy(self, xofs, yofs):
+    """offset the xy position"""
+    self.at.ofs_xy(xofs, yofs)
+    return self
+
+  def set_layer(self, l):
+    assert l in ('F.SilkS', 'F.Fab'), 'bad layer type %s' % l
+    self.layer = l
+    return self
+
+  def __str__(self):
+    s = []
+    s.append('(fp_text %s %s %s (layer %s)' % (self.ttype, self.text, self.at, self.layer))
+    s.append(indent(str(self.effects)))
+    s.append(')')
+    return '\n'.join(s)
+
+#-----------------------------------------------------------------------------
+
+class mod_module(object):
+  """footprint module"""
+
+  def __init__(self, name, descr):
+    self.name = name
+    self.descr = descr
+    self.pads = []
+    self.tags = []
+    self.text = []
+    self.layer = 'F.Cu'
+    self.attr = None
+    # TODO
+    # locked
+    # tedit
+    # autoplace_cost90
+    # autoplace_cost180
+    # solder_mask_margin
+    # solder_paste_margin
+    # solder_paste_margin_ratio
+    # clearance
+    # zone_connect
+    # thermal_width
+    # thermal_gap
+    # fp_line
+    # fp_circle
+    # fp_arc
+    # fp_poly
+    # fp_curve
+    # model
+
+  def add_tags(self, t):
+    self.tags.extend(t)
+
+  def add_pad(self, p):
+    if p.ptype == 'smd':
+      self.attr = 'smd'
+    self.pads.append(p)
+
+  def add_text(self, t):
+    self.text.append(t)
+
+  def tags_str(self):
+    return ' '.join(['"%s"' %x for x in self.tags])
+
+  def __str__(self):
+    s = []
+    s.append('(module %s (layer %s)' % (self.name, self.layer))
+    s.append(indent('(descr %s)' % self.descr))
+    s.append(indent('(tags %s)' % self.tags_str()))
+    if self.attr:
+      s.append(indent('(attr %s)' % self.attr))
+    s.extend([indent(str(x)) for x in self.text])
+    s.extend([indent(str(x)) for x in self.pads])
+    s.append(')\n')
+    return '\n'.join(s)
+
+#-----------------------------------------------------------------------------
+
+class mod_files(object):
+
+  def __init__(self, name):
+    self.name = name
+    self.modules = []
+
+  def add_module(self, m):
+    self.modules.append(m)
+
+#-----------------------------------------------------------------------------
+
+class lib_pin(object):
   """schematic pin"""
 
   def __init__(self, pin, name):
@@ -86,7 +346,9 @@ class sch_pin(object):
 
 #-----------------------------------------------------------------------------
 
-class sch_rect(object):
+class lib_rect(object):
+  """schematic rectangle"""
+
   def __init__(self, w, h):
     self.x1 = -w/2
     self.y1 = -h/2
@@ -122,7 +384,7 @@ class sch_rect(object):
 
 #-----------------------------------------------------------------------------
 
-class sch_text(object):
+class lib_text(object):
   """schematic text"""
 
   def __init__(self, text):
@@ -188,7 +450,7 @@ class sch_text(object):
 
 #-----------------------------------------------------------------------------
 
-class sch_unit(object):
+class lib_unit(object):
   """schematic unit"""
 
   def __init__(self):
@@ -222,7 +484,8 @@ class sch_unit(object):
 
 #-----------------------------------------------------------------------------
 
-class sch_component(object):
+class lib_component(object):
+  """schematic component"""
 
   def __init__(self, name, ref):
     self.name = name
@@ -235,10 +498,10 @@ class sch_component(object):
     self.power = False
     self.units = []
     self.text = (
-      sch_text(self.ref), # F0 reference
-      sch_text(self.name), # F1 component name
-      sch_text(""), # F2 footprint name
-      sch_text(""), # F3 relative path to datasheet
+      lib_text(self.ref), # F0 reference
+      lib_text(self.name), # F1 component name
+      lib_text(""), # F2 footprint name
+      lib_text(""), # F3 relative path to datasheet
     )
 
   def get_text(self, i):
@@ -299,8 +562,8 @@ class sch_component(object):
 
 #-----------------------------------------------------------------------------
 
-class sch_lib(object):
-  """schematic library"""
+class lib_file(object):
+  """schematic library file"""
 
   def __init__(self, name):
     self.name = name
@@ -329,7 +592,7 @@ class sch_lib(object):
 
 #-----------------------------------------------------------------------------
 
-class doc_component(object):
+class dcm_component(object):
   """documentation component"""
 
   def __init__(self, name, descr):
@@ -350,8 +613,8 @@ class doc_component(object):
 
 #-----------------------------------------------------------------------------
 
-class doc_lib(object):
-  """documentation library"""
+class dcm_file(object):
+  """parts documentation file"""
 
   def __init__(self, name):
     self.name = name

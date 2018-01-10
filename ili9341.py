@@ -11,11 +11,13 @@ There are 3 SPI connected subsystems in this module:
 """
 #-----------------------------------------------------------------------------
 
-import kicad_lib
+import kicad
 
 #-----------------------------------------------------------------------------
 
 name = 'ILI9341'
+descr = 'ILI9341 LCD Module'
+tags = (name, 'LCD',)
 
 pinset = (
   (1, 'LCD_SDO', 'O'),
@@ -39,11 +41,13 @@ pinset = (
 )
 
 #-----------------------------------------------------------------------------
+# part documentation
 
-dcm = kicad_lib.doc_component(name, 'ILI9341 LCD Module')
-dcm.add_keywords((name, 'LCD',))
+dcm = kicad.dcm_component(name, descr)
+dcm.add_keywords(tags)
 
 #-----------------------------------------------------------------------------
+# schematic symbol
 
 p_len = 200
 p_delta = 150
@@ -53,7 +57,7 @@ rh = ((len(pinset) - 1) * p_delta) + (2 * r_extra)
 
 def set_pins(unit, pinset, w, h):
   for (pin_number, pin_name, pin_type) in pinset:
-    p = kicad_lib.sch_pin('%d' % pin_number, pin_name)
+    p = kicad.lib_pin('%d' % pin_number, pin_name)
     x = w/2 + p_len
     y = h/2 - r_extra - ((pin_number - 1) * p_delta)
     p.ofs_xy(x, y)
@@ -62,18 +66,32 @@ def set_pins(unit, pinset, w, h):
     p.set_length(p_len)
     unit.add_pin(p)
 
-#-----------------------------------------------------------------------------
-
-lib = kicad_lib.sch_component(name, 'M')
+lib = kicad.lib_component(name, 'M')
 lib.get_text(0).set_bl().ofs_xy(-rw/2, rh/2 + 50)
 lib.get_text(1).set_tl().ofs_xy(-rw/2, -rh/2 - 50)
 
-u = kicad_lib.sch_unit()
-u.add_shape(kicad_lib.sch_rect(rw, rh))
+u = kicad.lib_unit()
+u.add_shape(kicad.lib_rect(rw, rh))
 set_pins(u, pinset, rw, rh)
 lib.add_unit(u)
 
 # pin alignment
 lib.ofs_xy(0, 25)
+
+#-----------------------------------------------------------------------------
+# pcb footprint
+
+mod = kicad.mod_module(name, descr)
+mod.add_tags(tags)
+
+t = kicad.mod_text('REF**', 'reference')
+t.set_layer('F.SilkS')
+mod.add_text(t)
+
+t = kicad.mod_text(name, 'value')
+t.set_layer('F.Fab')
+mod.add_text(t)
+
+mod.add_pad(kicad.mod_pad('10', ptype='smd', shape='rect'))
 
 #-----------------------------------------------------------------------------
