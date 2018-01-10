@@ -1,8 +1,9 @@
 
+DST = /home/jasonh/work/googoomuck/hw
+
 LIB = ggm.lib
 DCM = ggm.dcm
-
-DST = /home/jasonh/work/googoomuck/hw
+MOD = $(DST)/ggm.pretty
 
 all:
 	./py2lib -i ggm -t lib > $(LIB)
@@ -10,6 +11,7 @@ all:
 	./py2lib -i ggm -t mod
 	cp $(LIB) $(DST)
 	cp $(DCM) $(DST)
+	cp *.kicad_mod $(MOD)
 
 clean:
 	-rm $(LIB)
