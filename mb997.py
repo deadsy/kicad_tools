@@ -13,6 +13,7 @@ import kicad
 name = 'MB997'
 descr = 'STM32F4 Discovery Board'
 tags = (name, 'STM32', 'STM32F4', 'STM32F407', 'Discovery',)
+url = 'http://www.st.com/en/evaluation-tools/stm32f4discovery.html'
 
 # P1 Side (number, name, type)
 pinset1 = (
@@ -127,7 +128,7 @@ pinset2 = (
 
 dcm = kicad.dcm_component(name, descr)
 dcm.add_keywords(tags)
-dcm.add_url('http://www.st.com/en/evaluation-tools/stm32f4discovery.html')
+dcm.add_url(url)
 
 #-----------------------------------------------------------------------------
 # schematic symbol

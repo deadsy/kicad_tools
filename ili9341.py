@@ -16,8 +16,9 @@ import kicad
 #-----------------------------------------------------------------------------
 
 name = 'ILI9341'
-descr = 'ILI9341 LCD Module'
+descr = 'LCD Module 2.8" 240x320 SPI TFT with touch sensor and SD card'
 tags = (name, 'LCD',)
+url = 'https://www.amazon.com/gp/product/B017FZTIO6/ref=od_aui_detailpages00?ie=UTF8&psc=1'
 
 pinset = (
   (1, 'LCD_SDO', 'O'),
@@ -45,7 +46,7 @@ pinset = (
 
 dcm = kicad.dcm_component(name, descr)
 dcm.add_keywords(tags)
-dcm.add_url('https://www.amazon.com/gp/product/B017FZTIO6/ref=od_aui_detailpages00?ie=UTF8&psc=1')
+dcm.add_url(url)
 
 #-----------------------------------------------------------------------------
 # schematic symbol
