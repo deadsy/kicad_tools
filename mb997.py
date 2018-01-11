@@ -181,8 +181,7 @@ t = kicad.mod_text(name, 'value')
 t.set_layer('F.Fab')
 mod.add_shape(t)
 
-p = kicad.mod_poly()
-mod.add_shape(p)
+mod.add_rect(10.0, 20.0, 'F.Fab', 1.0)
 
 mod.add_pad(kicad.mod_pad('10', ptype='smd', shape='rect'))
 

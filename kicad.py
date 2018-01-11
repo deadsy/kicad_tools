@@ -95,7 +95,7 @@ class mod_pts(object):
 
   def __str__(self):
     assert self.points is not None and len(self.points) != 0, 'no points in points list'
-    return '(pts %s)' % ''.join([str(x) for x in self.points])
+    return '(pts %s)' % ' '.join([str(x) for x in self.points])
 
 #-----------------------------------------------------------------------------
 
@@ -143,24 +143,36 @@ layer_names = (
   'B', # back
 )
 
+def valid_layer(l):
+  """is this a valid layer?"""
+  x = l.split('.')
+  if len(x) != 2:
+    return False
+  if x[0] not in layer_names:
+    return False
+  if x[1] not in layer_types:
+    return False
+  return True
+
 class mod_layer(object):
   """single footprint layer"""
 
-  def __init__(self, layer=None):
-    self.layer = layer
+  def __init__(self, l):
+    assert valid_layer(l), 'invalid layer %s' % l
+    self.layer = l
 
   def __str__(self):
-    assert self.layer is not None, 'no layer defined'
     return '(layer %s)' % self.layer
 
 class mod_layers(object):
   """list of footprint layers"""
 
-  def __init__(self, layers=None):
+  def __init__(self, layers):
+    for l in layers:
+      assert valid_layer(l), 'invalid layer %s' % l
     self.layers = layers
 
   def __str__(self):
-    assert self.layers is not None, 'no layers defined'
     return '(layers %s)' % ' '.join([x for x in self.layers])
 
 #-----------------------------------------------------------------------------
@@ -240,12 +252,12 @@ ttypes = ('reference', 'value', 'user')
 class mod_text(object):
   """footprint fp_text element"""
 
-  def __init__(self, text, ttype):
+  def __init__(self, text, ttype, layer='F.SilkS'):
     assert ttype in ttypes, 'bad ttype %s' % ttype
     self.text = text
     self.ttype = ttype
     self.at = mod_at()
-    self.layer = 'F.SilkS'
+    self.layer = mod_layer(layer)
     self.effects = mod_effects()
 
   def ofs_xy(self, xofs, yofs):
@@ -254,13 +266,12 @@ class mod_text(object):
     return self
 
   def set_layer(self, l):
-    assert l in ('F.SilkS', 'F.Fab'), 'bad layer type %s' % l
-    self.layer = l
+    self.layer = mod_layer(l)
     return self
 
   def __str__(self):
     s = []
-    s.append('(fp_text %s %s %s (layer %s)' % (self.ttype, self.text, self.at, self.layer))
+    s.append('(fp_text %s %s %s %s' % (self.ttype, self.text, self.at, self.layer))
     s.append(indent(str(self.effects)))
     s.append(')')
     return '\n'.join(s)
@@ -270,17 +281,17 @@ class mod_text(object):
 class mod_poly(object):
   """footprint fp_poly element"""
 
-  def __init__(self):
-    self.pts = mod_pts()
-    self.layer = mod_layer()
-    self.width = mod_width()
+  def __init__(self, pts, layer, width):
+    self.pts = pts
+    self.layer = layer
+    self.width = width
 
   def __str__(self):
     s = []
     s.append('(fp_poly')
-    s.append(str(self.pts))
-    s.append(str(self.layer))
-    s.append(str(self.width))
+    s.append(indent(str(self.pts)))
+    s.append(indent(str(self.layer)))
+    s.append(indent(str(self.width)))
     s.append(')')
     return '\n'.join(s)
 
@@ -289,13 +300,13 @@ class mod_poly(object):
 class mod_module(object):
   """footprint module"""
 
-  def __init__(self, name, descr):
+  def __init__(self, name, descr, layer='F.Cu'):
     self.name = name
     self.descr = descr
     self.pads = []
     self.tags = []
     self.shapes = []
-    self.layer = 'F.Cu'
+    self.layer = mod_layer(layer)
     self.attr = None
     # TODO
     # locked
@@ -326,12 +337,22 @@ class mod_module(object):
   def add_shape(self, s):
     self.shapes.append(s)
 
+  def add_rect(self, w, h, layer, pwidth):
+    """add a centered w x h rectangle to a footprint"""
+    tl = mod_xy(-w/2.0, h/2.0)
+    tr = mod_xy(w/2.0, h/2.0)
+    bl = mod_xy(-w/2.0, -h/2.0)
+    br = mod_xy(w/2.0, -h/2.0)
+    pts =mod_pts((tl, tr, br, bl,))
+    poly = mod_poly(pts, mod_layer(layer), mod_width(pwidth))
+    self.add_shape(poly)
+
   def tags_str(self):
     return '"%s"' % ' '.join([str(x) for x in self.tags])
 
   def __str__(self):
     s = []
-    s.append('(module %s (layer %s) (tedit %X)' % (self.name, self.layer, tedit_secs()))
+    s.append('(module %s %s (tedit %X)' % (self.name, self.layer, tedit_secs()))
     s.append(indent('(descr "%s")' % self.descr))
     s.append(indent('(tags %s)' % self.tags_str()))
     if self.attr:
