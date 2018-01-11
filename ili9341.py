@@ -16,7 +16,7 @@ import kicad
 #-----------------------------------------------------------------------------
 
 name = 'ILI9341'
-descr = 'LCD Module 2.8" 240x320 SPI TFT with touch sensor and SD card'
+descr = 'LCD Module 2.8 inch 240x320 SPI TFT with touch sensor and SD card'
 tags = (name, 'LCD',)
 url = 'https://www.amazon.com/gp/product/B017FZTIO6/ref=od_aui_detailpages00?ie=UTF8&psc=1'
 
@@ -90,11 +90,11 @@ mod.add_tags(tags)
 
 t = kicad.mod_text('REF**', 'reference')
 t.set_layer('F.SilkS')
-mod.add_text(t)
+mod.add_shape(t)
 
 t = kicad.mod_text(name, 'value')
 t.set_layer('F.Fab')
-mod.add_text(t)
+mod.add_shape(t)
 
 mod.add_pad(kicad.mod_pad('10', ptype='smd', shape='rect'))
 

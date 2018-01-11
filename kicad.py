@@ -32,7 +32,7 @@ def tedit_secs():
 #-----------------------------------------------------------------------------
 
 class mod_at(object):
-  """footprint add"""
+  """footprint at element"""
 
   def __init__(self, x=0.0, y=0.0, a=0.0):
     self.x = x
@@ -53,7 +53,7 @@ class mod_at(object):
 #-----------------------------------------------------------------------------
 
 class mod_size(object):
-  """footprint size"""
+  """footprint size element"""
 
   def __init__(self, w=0.0, h=0.0):
     self.w = w
@@ -61,6 +61,41 @@ class mod_size(object):
 
   def __str__(self):
     return '(size %.2f %.2f)' % (self.w, self.h)
+
+#-----------------------------------------------------------------------------
+
+class mod_width(object):
+  """footprint width element"""
+
+  def __init__(self, w=0.0):
+    self.w = w
+
+  def __str__(self):
+    return '(width %.2f)' % self.w
+
+#-----------------------------------------------------------------------------
+
+class mod_xy(object):
+  """footprint xy element"""
+
+  def __init__(self, x=0.0, y=0.0):
+    self.x = x
+    self.y = y
+
+  def __str__(self):
+    return '(xy %.2f %.2f)' % (self.x, self.y)
+
+#-----------------------------------------------------------------------------
+
+class mod_pts(object):
+  """footprint pts (points) element"""
+
+  def __init__(self, points=None):
+    self.points = points
+
+  def __str__(self):
+    assert self.points is not None and len(self.points) != 0, 'no points in points list'
+    return '(pts %s)' % ''.join([str(x) for x in self.points])
 
 #-----------------------------------------------------------------------------
 
@@ -92,18 +127,41 @@ class mod_drill(object):
 
 #-----------------------------------------------------------------------------
 
+layer_types = (
+  'Cu', # copper
+  'Paste', # solder paste
+  'Adhes', # adhesive
+  'SilkS', # silkscreen
+  'Mask', # solder mask
+  'CrtYd', # courtyard
+  'Fab', # fabrication
+)
+
+layer_names = (
+  '*', # all
+  'F', # front
+  'B', # back
+)
+
+class mod_layer(object):
+  """single footprint layer"""
+
+  def __init__(self, layer=None):
+    self.layer = layer
+
+  def __str__(self):
+    assert self.layer is not None, 'no layer defined'
+    return '(layer %s)' % self.layer
+
 class mod_layers(object):
-  """footprint layers"""
+  """list of footprint layers"""
 
   def __init__(self, layers=None):
     self.layers = layers
 
   def __str__(self):
-    if self.layers:
-      s = [x for x in self.layers]
-      return '(layers %s)' % ' '.join(s)
-    else:
-      return ''
+    assert self.layers is not None, 'no layers defined'
+    return '(layers %s)' % ' '.join([x for x in self.layers])
 
 #-----------------------------------------------------------------------------
 
@@ -180,6 +238,7 @@ class mod_effects(object):
 ttypes = ('reference', 'value', 'user')
 
 class mod_text(object):
+  """footprint fp_text element"""
 
   def __init__(self, text, ttype):
     assert ttype in ttypes, 'bad ttype %s' % ttype
@@ -208,6 +267,25 @@ class mod_text(object):
 
 #-----------------------------------------------------------------------------
 
+class mod_poly(object):
+  """footprint fp_poly element"""
+
+  def __init__(self):
+    self.pts = mod_pts()
+    self.layer = mod_layer()
+    self.width = mod_width()
+
+  def __str__(self):
+    s = []
+    s.append('(fp_poly')
+    s.append(str(self.pts))
+    s.append(str(self.layer))
+    s.append(str(self.width))
+    s.append(')')
+    return '\n'.join(s)
+
+#-----------------------------------------------------------------------------
+
 class mod_module(object):
   """footprint module"""
 
@@ -216,7 +294,7 @@ class mod_module(object):
     self.descr = descr
     self.pads = []
     self.tags = []
-    self.text = []
+    self.shapes = []
     self.layer = 'F.Cu'
     self.attr = None
     # TODO
@@ -245,20 +323,20 @@ class mod_module(object):
       self.attr = 'smd'
     self.pads.append(p)
 
-  def add_text(self, t):
-    self.text.append(t)
+  def add_shape(self, s):
+    self.shapes.append(s)
 
   def tags_str(self):
-    return ' '.join(['"%s"' %x for x in self.tags])
+    return '"%s"' % ' '.join([str(x) for x in self.tags])
 
   def __str__(self):
     s = []
-    s.append('(module %s (layer %s) (tedit %x)' % (self.name, self.layer, tedit_secs()))
-    s.append(indent('(descr %s)' % self.descr))
+    s.append('(module %s (layer %s) (tedit %X)' % (self.name, self.layer, tedit_secs()))
+    s.append(indent('(descr "%s")' % self.descr))
     s.append(indent('(tags %s)' % self.tags_str()))
     if self.attr:
       s.append(indent('(attr %s)' % self.attr))
-    s.extend([indent(str(x)) for x in self.text])
+    s.extend([indent(str(x)) for x in self.shapes])
     s.extend([indent(str(x)) for x in self.pads])
     s.append(')\n')
     return '\n'.join(s)

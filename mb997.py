@@ -175,11 +175,14 @@ mod.add_tags(tags)
 
 t = kicad.mod_text('REF**', 'reference')
 t.set_layer('F.SilkS')
-mod.add_text(t)
+mod.add_shape(t)
 
 t = kicad.mod_text(name, 'value')
 t.set_layer('F.Fab')
-mod.add_text(t)
+mod.add_shape(t)
+
+p = kicad.mod_poly()
+mod.add_shape(p)
 
 mod.add_pad(kicad.mod_pad('10', ptype='smd', shape='rect'))
 

@@ -15,6 +15,7 @@ all:
 	./py2lib -i ggm -t mod
 	cp $(LIB) $(DST)
 	cp $(DCM) $(DST)
+	mkdir -p $(MOD)
 	cp *.kicad_mod $(MOD)
 
 libtest:
