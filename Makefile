@@ -1,5 +1,5 @@
 
-KICAD_UTILS = /home/jasonh/work/jasonh/kicad-library-utils
+KICAD_UTILS = /home/jasonh/work/kicad-library-utils
 CHKLIB = $(KICAD_UTILS)/schlib/checklib.py
 CHKMOD = $(KICAD_UTILS)/pcb/check_kicad_mod.py
 

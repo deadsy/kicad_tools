@@ -57,8 +57,9 @@ r_extra = 100
 rw = 600
 rh = ((len(pinset) - 1) * p_delta) + (2 * r_extra)
 
-def set_pins(unit, pinset, w, h):
-  for (pin_number, pin_name, pin_type) in pinset:
+def set_pins(unit, pins, w, h):
+  """add the pins to the component unit"""
+  for (pin_number, pin_name, pin_type) in pins:
     p = kicad.lib_pin('%d' % pin_number, pin_name)
     x = w/2 + p_len
     y = h/2 - r_extra - ((pin_number - 1) * p_delta)
@@ -69,8 +70,9 @@ def set_pins(unit, pinset, w, h):
     unit.add_pin(p)
 
 lib = kicad.lib_component(name, 'M')
-lib.get_text(0).set_bl().ofs_xy(-rw/2, rh/2 + 50)
-lib.get_text(1).set_tl().ofs_xy(-rw/2, -rh/2 - 50)
+lib.get_text(0).set_bl().ofs_xy(-rw/2, rh/2 + 50) # set the reference location
+lib.get_text(1).set_tl().ofs_xy(-rw/2, -rh/2 - 50) # set the name location
+lib.add_footprint('ggm', name)
 
 u = kicad.lib_unit()
 u.add_shape(kicad.lib_rect(rw, rh))

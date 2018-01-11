@@ -289,7 +289,8 @@ class lib_pin(object):
     self.part = 1
     self.dmg = 1
     self.type = 'P'
-    self.shape = None
+    self.shape = ''
+    self.visible = ''
     self.x = 0
     self.y = 0
 
@@ -315,6 +316,7 @@ class lib_pin(object):
     self.orientation = o
 
   def set_type(self, t):
+    """set the pin type"""
     t_vals = (
       'I', # Input
       'O', # Output
@@ -330,6 +332,25 @@ class lib_pin(object):
       )
     assert t in t_vals, 'bad pin type %s' % t
     self.type = t
+    if self.type == 'N':
+      self.set_visible(False)
+      self.set_shape('')
+
+  def set_shape(self, s):
+    """set the pin shape"""
+    s_vals = (
+      '', # line
+      'I', # inverted
+      'C', # clock
+      'L', # input low
+      'V', # output low
+    )
+    assert s in s_vals, 'bad pin shape %s' % s
+    self.shape = s
+
+  def set_visible(self, v):
+    """set the pin as visible/invisible"""
+    self.visible = ('N', '')[v]
 
   def set_length(self, l):
     self.length = l
@@ -348,7 +369,7 @@ class lib_pin(object):
     s.append('%d' % self.part)
     s.append('%d' % self.dmg)
     s.append(self.type)
-    #self.shape
+    s.append('%s%s' % (self.visible, self.shape))
     return ' '.join(s)
 
 #-----------------------------------------------------------------------------
@@ -364,11 +385,20 @@ class lib_rect(object):
     self.part = 0
     self.dmg = 0
     self.pen = 10
-    self.fill = 'N'
+    self.fill = 'f'
 
   def set_part(self, p):
     """set the part number"""
     self.part = p
+
+  def set_fill(self, f):
+    f_vals = (
+      'f', # background
+      'F', # pen color
+      'N', # transparent
+    )
+    assert f in f_vals, 'bad fill value %s' % f
+    self.fill = f
 
   def ofs_xy(self, xofs, yofs):
     """offset the xy position"""
@@ -405,6 +435,11 @@ class lib_text(object):
     self.bold = False
     self.x = 0
     self.y = 0
+
+  def set_text(self, t):
+    """set the text field"""
+    self.text = t
+    return self
 
   def set_halign(self, a):
     """set horizontal alignment"""
@@ -506,6 +541,7 @@ class lib_component(object):
     self.locked = True
     self.power = False
     self.units = []
+    self.footprints = []
     self.text = (
       lib_text(self.ref), # F0 reference
       lib_text(self.name), # F1 component name
@@ -517,8 +553,13 @@ class lib_component(object):
     return self.text[i]
 
   def add_unit(self, u):
+    """add a sub-unit to the component"""
     self.units.append(u)
     self.nparts += 1
+
+  def add_footprint(self, library, name):
+    """add a footprint library and name to the component"""
+    self.footprints.append((library, name))
 
   def ofs_xy(self, xofs, yofs):
     """offset the component"""
@@ -545,6 +586,10 @@ class lib_component(object):
     s = []
     s.append('#\n# %s\n#' % self.name)
     s.append(self.emit_def())
+    if len(self.footprints) == 1:
+      # single footprint, set F2
+      (library, name) = self.footprints[0]
+      self.text[2].set_text('%s:%s' % (library, name))
     s.extend(['F%d %s' % (i, self.text[i]) for i in range(len(self.text))])
     return '\n'.join(s)
 
@@ -560,11 +605,20 @@ class lib_component(object):
     s.append('ENDDRAW')
     return '\n'.join(s)
 
+  def emit_footprints(self):
+    s = []
+    s.append('$FPLIST')
+    # add footprint name patterns
+    s.extend([' %s*' % x[1] for x in self.footprints])
+    s.append('$ENDFPLIST')
+    return '\n'.join(s)
+
   def __str__(self):
     for i, x in enumerate(self.units):
       x.set_part(i + 1)
     s = []
     s.append(self.emit_head())
+    s.append(self.emit_footprints())
     s.append(self.emit_draw())
     s.append(self.emit_tail())
     return '\n'.join(s)
