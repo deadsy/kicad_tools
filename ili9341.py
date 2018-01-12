@@ -96,6 +96,8 @@ t = kicad.mod_text(name, 'value')
 t.set_layer('F.Fab')
 mod.add_shape(t)
 
+mod.add_rect(50, 86, 'F.CrtYd', 0.05)
+
 mod.add_pad(kicad.mod_pad('10', ptype='smd', shape='rect'))
 
 #-----------------------------------------------------------------------------

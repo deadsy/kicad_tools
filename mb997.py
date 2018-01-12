@@ -15,112 +15,124 @@ descr = 'STM32F4 Discovery Board'
 tags = (name, 'STM32', 'STM32F4', 'STM32F407', 'Discovery',)
 url = 'http://www.st.com/en/evaluation-tools/stm32f4discovery.html'
 
-# P1 Side (number, name, type)
-pinset1 = (
-  (1, 'GND', 'W'),
-  (3, 'VDD', 'w'),
-  (5, 'GND', 'W'),
-  (7, 'PC1', 'B'),
-  (9, 'PC3', 'B'),
-  (11, 'PA1', 'B'),
-  (13, 'PA3', 'B'),
-  (15, 'PA5', 'B'),
-  (17, 'PA7', 'B'),
-  (19, 'PC5', 'B'),
-  (21, 'PB1', 'B'),
-  (23, 'GND', 'W'),
-  (25, 'PE7', 'B'),
-  (27, 'PE9', 'B'),
-  (29, 'PE11', 'B'),
-  (31, 'PE13', 'B'),
-  (33, 'PE15', 'B'),
-  (35, 'PB11', 'B'),
-  (37, 'PB13', 'B'),
-  (39, 'PB15', 'B'),
-  (41, 'PD9', 'B'),
-  (43, 'PD11', 'B'),
-  (45, 'PD13', 'B'),
-  (47, 'PD15', 'B'),
-  (49, 'GND', 'W'),
-  (2, 'GND', 'W'),
-  (4, 'VDD', 'w'),
-  (6, 'NRST', 'I'),
-  (8, 'PC0', 'B'),
-  (10, 'PC2', 'B'),
-  (12, 'PA0', 'B'),
-  (14, 'PA2', 'B'),
-  (16, 'PA4', 'B'),
-  (18, 'PA6', 'B'),
-  (20, 'PC4', 'B'),
-  (22, 'PB0', 'B'),
-  (24, 'PB2', 'B'),
-  (26, 'PE8', 'B'),
-  (28, 'PE10', 'B'),
-  (30, 'PE12', 'B'),
-  (32, 'PE14', 'B'),
-  (34, 'PB10', 'B'),
-  (36, 'PB12', 'B'),
-  (38, 'PB14', 'B'),
-  (40, 'PD8', 'B'),
-  (42, 'PD10', 'B'),
-  (44, 'PD12', 'B'),
-  (46, 'PD14', 'B'),
-  (48, 'NC', 'N'),
-  (50, 'GND', 'W'),
-)
-
-# P2 Side (number, name, type)
-pinset2 = (
-  (1, 'GND', 'W'),
-  (3, '5V', 'w'),
-  (5, '3V', 'w'),
-  (7, 'PH0', 'B'),
-  (9, 'PC14', 'B'),
-  (11, 'PE6', 'B'),
-  (13, 'PE4', 'B'),
-  (15, 'PE2', 'B'),
-  (17, 'PE0', 'B'),
-  (19, 'PB8', 'B'),
-  (21, 'BOOT0', 'I'),
-  (23, 'PB6', 'B'),
-  (25, 'PB4', 'B'),
-  (27, 'PD7', 'B'),
-  (29, 'PD5', 'B'),
-  (31, 'PD3', 'B'),
-  (33, 'PD1', 'B'),
-  (35, 'PC12', 'B'),
-  (37, 'PC10', 'B'),
-  (39, 'PA14', 'B'),
-  (41, 'PA10', 'B'),
-  (43, 'PA8', 'B'),
-  (45, 'PC8', 'B'),
-  (47, 'PC6', 'B'),
-  (49, 'GND', 'W'),
-  (2, 'GND', 'W'),
-  (4, '5V', 'w'),
-  (6, '3V', 'w'),
-  (8, 'PH1', 'B'),
-  (10, 'PC15', 'B'),
-  (12, 'PC13', 'B'),
-  (14, 'PE5', 'B'),
-  (16, 'PE3', 'B'),
-  (18, 'PE1', 'B'),
-  (20, 'PB9', 'B'),
-  (22, 'VDD', 'w'),
-  (24, 'PB7', 'B'),
-  (26, 'PB5', 'B'),
-  (28, 'PB3', 'B'),
-  (30, 'PD6', 'B'),
-  (32, 'PD4', 'B'),
-  (34, 'PD2', 'B'),
-  (36, 'PD0', 'B'),
-  (38, 'PC11', 'B'),
-  (40, 'PA15', 'B'),
-  (42, 'PA13', 'B'),
-  (44, 'PA9', 'B'),
-  (46, 'PC9', 'B'),
-  (48, 'PC7', 'B'),
-  (50, 'GND', 'W'),
+# (connector, number, name, type)
+all_pins = (
+  ( # port a
+    (1, 12, 'SW_PUSH/PA0', 'B'),
+    (1, 11, 'system_reset/PA1', 'B'),
+    (1, 14, 'PA2', 'B'),
+    (1, 13, 'PA3', 'B'),
+    (1, 16, 'I2S3_WS/PA4', 'B'),
+    (1, 15, 'SPI1_SCK/PA5', 'B'),
+    (1, 18, 'SPI1_MISO/PA6', 'B'),
+    (1, 17, 'SPI1_MOSI/PA7', 'B'),
+    (2, 43, 'PA8', 'B'),
+    (2, 44, 'VBUS_FS/PA9', 'B'),
+    (2, 41, 'OTG_FS_ID/PA10', 'B'),
+    # PA11 - not on connector
+    # PA12 - not on connector
+    (2, 42, 'SWDIO/PA13', 'B'),
+    (2, 39, 'SWCLK/PA14', 'B'),
+    (2, 40, 'PA15', 'B'),
+  ),
+  ( # port b
+    (1, 22, 'PB0', 'B'),
+    (1, 21, 'PB1', 'B'),
+    (1, 24, 'PB2', 'B'),
+    (2, 28, 'SWO/PB3', 'B'),
+    (2, 25, 'PB4', 'B'),
+    (2, 26, 'PB5', 'B'),
+    (2, 23, 'Audio_SCL/PB6', 'B'),
+    (2, 24, 'PB7', 'B'),
+    (2, 19, 'PB8', 'B'),
+    (2, 20, 'Audio_SDA/PB9', 'B'),
+    (1, 34, 'CLK_IN/PB10', 'B'),
+    (1, 35, 'PB11', 'B'),
+    (1, 36, 'PB12', 'B'),
+    (1, 37, 'PB13', 'B'),
+    (1, 38, 'PB14', 'B'),
+    (1, 39, 'PB15', 'B'),
+  ),
+  ( # port c
+    (1, 8, 'OTG_FS_PSON/PC0', 'B'),
+    (1, 7, 'PC1', 'B'),
+    (1, 10, 'PC2', 'B'),
+    (1, 9, 'PDM_OUT/PC3', 'B'),
+    (1, 20, 'PC4', 'B'),
+    (1, 19, 'PC5', 'B'),
+    (2, 47, 'PC6', 'B'),
+    (2, 48, 'I2S3_MCK/PC7', 'B'),
+    (2, 45, 'PC8', 'B'),
+    (2, 46, 'PC9', 'B'),
+    (2, 37, 'I2S3_SCK/PC10', 'B'),
+    (2, 38, 'PC11', 'B'),
+    (2, 35, 'I2S3_SD/PC12', 'B'),
+    (2, 12, 'PC13', 'B'),
+    (2, 9, 'osc_in/PC14', 'B'),
+    (2, 10, 'osc_out/PC15', 'B'),
+  ),
+  ( # port d
+    (2, 36, 'PD0', 'B'),
+    (2, 33, 'PD1', 'B'),
+    (2, 34, 'PD2', 'B'),
+    (2, 31, 'PD3', 'B'),
+    (2, 32, 'Audio_RST/PD4', 'B'),
+    (2, 29, 'OTG_FS_OC/PD5', 'B'),
+    (2, 30, 'PD6', 'B'),
+    (2, 27, 'PD7', 'B'),
+    (1, 40, 'PD8', 'B'),
+    (1, 41, 'PD9', 'B'),
+    (1, 42, 'PD10', 'B'),
+    (1, 43, 'PD11', 'B'),
+    (1, 44, 'LED4/PD12', 'B'),
+    (1, 45, 'LED3/PD13', 'B'),
+    (1, 46, 'LED5/PD14', 'B'),
+    (1, 47, 'LED6/PD15', 'B'),
+  ),
+  ( # port e
+    (2, 17, 'MEMS_INT1/PE0', 'B'),
+    (2, 18, 'MEMS_INT2/PE1', 'B'),
+    (2, 15, 'PE2', 'B'),
+    (2, 16, 'MEMS_CS/PE3', 'B'),
+    (2, 13, 'PE4', 'B'),
+    (2, 14, 'PE5', 'B'),
+    (2, 11, 'PE6', 'B'),
+    (1, 25, 'PE7', 'B'),
+    (1, 26, 'PE8', 'B'),
+    (1, 27, 'PE9', 'B'),
+    (1, 28, 'PE10', 'B'),
+    (1, 29, 'PE11', 'B'),
+    (1, 30, 'PE12', 'B'),
+    (1, 31, 'PE13', 'B'),
+    (1, 32, 'PE14', 'B'),
+    (1, 33, 'PE15', 'B'),
+  ),
+  ( # misc
+    (1, 6, 'NRST', 'I'),
+    (1, 48, 'NC', 'N'),
+    (2, 7, 'ph0_osc_in/PH0', 'B'),
+    (2, 8, 'ph1_osc_out/PH1', 'B'),
+    (2, 21, 'BOOT0', 'I'),
+  ),
+  ( # power
+    (1, 3, 'VDD', 'w'),
+    (1, 4, 'VDD', 'w'),
+    (2, 22, 'VDD', 'w'),
+    (2, 3, '5V', 'w'),
+    (2, 4, '5V', 'w'),
+    (2, 5, '3V', 'w'),
+    (2, 6, '3V', 'w'),
+    (1, 1, 'GND', 'W'),
+    (1, 2, 'GND', 'W'),
+    (1, 5, 'GND', 'W'),
+    (1, 23, 'GND', 'W'),
+    (1, 49, 'GND', 'W'),
+    (1, 50, 'GND', 'W'),
+    (2, 1, 'GND', 'W'),
+    (2, 2, 'GND', 'W'),
+    (2, 49, 'GND', 'W'),
+    (2, 50, 'GND', 'W'),
+  ),
 )
 
 #-----------------------------------------------------------------------------
@@ -136,9 +148,9 @@ dcm.add_url(url)
 p_len = 200
 p_delta = 100
 r_extra = 100
-p_height = len(pinset1) / 2
-rh = (p_height - 1) * p_delta + (2 * r_extra)
+p_height = 17
 rw = 800
+rh = ((p_height - 1) * p_delta) + (2 * r_extra)
 
 def set_pins(unit, pins, prefix, w, h):
   """add the pins to the component unit"""
@@ -152,20 +164,33 @@ def set_pins(unit, pins, prefix, w, h):
     p.set_length(p_len)
     unit.add_pin(p)
 
+def add_pins(unit, pins, w, h):
+  # add the pins to the unit"""
+  i = 0
+  for (prefix, pin_number, pin_name, pin_type) in pins:
+    p = kicad.lib_pin('%d.%d' % (prefix, pin_number), pin_name)
+    x = w/2 + p_len
+    y = h/2 - r_extra - (i * p_delta)
+    p.ofs_xy(x, y)
+    p.set_orientation('L')
+    p.set_type(pin_type)
+    p.set_length(p_len)
+    unit.add_pin(p)
+    i += 1
+
+def add_units(lib, all_pins):
+  # add the units to the component"""
+  for unit_pins in all_pins:
+    u = kicad.lib_unit()
+    u.add_shape(kicad.lib_rect(rw, rh))
+    add_pins(u, unit_pins, rw, rh)
+    lib.add_unit(u)
+
 lib = kicad.lib_component(name, 'M')
 lib.get_text(0).set_bl().ofs_xy(-rw/2, rh/2 + 50) # set the reference location
 lib.get_text(1).set_tl().ofs_xy(-rw/2, -rh/2 - 50) # set the name location
 lib.add_footprint('ggm', name)
-
-u = kicad.lib_unit()
-u.add_shape(kicad.lib_rect(rw, rh))
-set_pins(u, pinset1, 1, rw, rh)
-lib.add_unit(u)
-
-u = kicad.lib_unit()
-u.add_shape(kicad.lib_rect(rw, rh))
-set_pins(u, pinset2, 2, rw, rh)
-lib.add_unit(u)
+add_units(lib, all_pins)
 
 #-----------------------------------------------------------------------------
 # pcb footprint
@@ -181,7 +206,7 @@ t = kicad.mod_text(name, 'value')
 t.set_layer('F.Fab')
 mod.add_shape(t)
 
-mod.add_rect(10.0, 20.0, 'F.Fab', 1.0)
+mod.add_rect(66, 97, 'F.CrtYd', 0.05)
 
 mod.add_pad(kicad.mod_pad('10', ptype='smd', shape='rect'))
 

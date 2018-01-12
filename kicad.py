@@ -23,7 +23,7 @@ def indent(s):
 MM_PER_INCH = 25.4
 
 def mil2mm(mil):
-  return MM_PER_INCH * (mil / 1000.0)
+  return MM_PER_INCH * (float(mil) / 1000.0)
 
 def tedit_secs():
   """return number of seconds since 1970/1/1"""
@@ -31,13 +31,22 @@ def tedit_secs():
 
 #-----------------------------------------------------------------------------
 
+class point(object):
+  """2d point"""
+
+  def __init__(self, x, y):
+    self.x = float(x)
+    self.y = float(y)
+
+#-----------------------------------------------------------------------------
+
 class mod_at(object):
   """footprint at element"""
 
-  def __init__(self, x=0.0, y=0.0, a=0.0):
-    self.x = x
-    self.y = y
-    self.a = a
+  def __init__(self, x, y, a=0):
+    self.x = float(x)
+    self.y = float(y)
+    self.a = float(a)
 
   def ofs_xy(self, xofs, yofs):
     """offset the xy position"""
@@ -55,9 +64,9 @@ class mod_at(object):
 class mod_size(object):
   """footprint size element"""
 
-  def __init__(self, w=0.0, h=0.0):
-    self.w = w
-    self.h = h
+  def __init__(self, w, h):
+    self.w = float(w)
+    self.h = float(h)
 
   def __str__(self):
     return '(size %.2f %.2f)' % (self.w, self.h)
@@ -67,8 +76,8 @@ class mod_size(object):
 class mod_width(object):
   """footprint width element"""
 
-  def __init__(self, w=0.0):
-    self.w = w
+  def __init__(self, w):
+    self.w = float(w)
 
   def __str__(self):
     return '(width %.2f)' % self.w
@@ -78,12 +87,34 @@ class mod_width(object):
 class mod_xy(object):
   """footprint xy element"""
 
-  def __init__(self, x=0.0, y=0.0):
-    self.x = x
-    self.y = y
+  def __init__(self, x, y):
+    self.x = float(x)
+    self.y = float(y)
 
   def __str__(self):
     return '(xy %.2f %.2f)' % (self.x, self.y)
+
+#-----------------------------------------------------------------------------
+
+class mod_start(object):
+  """footprint start element"""
+
+  def __init__(self, p):
+    self.p = p
+
+  def __str__(self):
+    return '(start %.2f %.2f)' % (self.p.x, self.p.y)
+
+#-----------------------------------------------------------------------------
+
+class mod_end(object):
+  """footprint end element"""
+
+  def __init__(self, p):
+    self.p = p
+
+  def __str__(self):
+    return '(end %.2f %.2f)' % (self.p.x, self.p.y)
 
 #-----------------------------------------------------------------------------
 
@@ -189,8 +220,8 @@ class mod_pad(object):
     self.name = name # pin number or name (string)
     self.ptype = ptype # pad type
     self.shape = shape
-    self.at = mod_at()
-    self.size = mod_size()
+    self.at = mod_at(0, 0)
+    self.size = mod_size(0, 0)
     self.rect_delta = mod_rect_delta()
     self.drill = mod_drill()
     if self.ptype in ('thru_hole', 'np_thru_hole'):
@@ -227,7 +258,7 @@ class mod_pad(object):
 class mod_font(object):
 
   def __init__(self):
-    self.size = mod_size(1.0, 1.0)
+    self.size = mod_size(1, 1)
     self.thickness = 0.15
 
   def __str__(self):
@@ -256,7 +287,7 @@ class mod_text(object):
     assert ttype in ttypes, 'bad ttype %s' % ttype
     self.text = text
     self.ttype = ttype
-    self.at = mod_at()
+    self.at = mod_at(0, 0)
     self.layer = mod_layer(layer)
     self.effects = mod_effects()
 
@@ -283,13 +314,34 @@ class mod_poly(object):
 
   def __init__(self, pts, layer, width):
     self.pts = pts
-    self.layer = layer
-    self.width = width
+    self.layer = mod_layer(layer)
+    self.width = mod_width(width)
 
   def __str__(self):
     s = []
     s.append('(fp_poly')
     s.append(indent(str(self.pts)))
+    s.append(indent(str(self.layer)))
+    s.append(indent(str(self.width)))
+    s.append(')')
+    return '\n'.join(s)
+
+#-----------------------------------------------------------------------------
+
+class mod_line(object):
+  """footprint fp_line element"""
+
+  def __init__(self, start, end, layer, width):
+    self.start = mod_start(start)
+    self.end = mod_end(end)
+    self.layer = mod_layer(layer)
+    self.width = mod_width(width)
+
+  def __str__(self):
+    s = []
+    s.append('(fp_line')
+    s.append(indent(str(self.start)))
+    s.append(indent(str(self.end)))
     s.append(indent(str(self.layer)))
     s.append(indent(str(self.width)))
     s.append(')')
@@ -337,15 +389,28 @@ class mod_module(object):
   def add_shape(self, s):
     self.shapes.append(s)
 
-  def add_rect(self, w, h, layer, pwidth):
-    """add a centered w x h rectangle to a footprint"""
+  def add_block(self, w, h, layer, pwidth):
+    """add a w x h block (filled) centered on the origin"""
     tl = mod_xy(-w/2.0, h/2.0)
     tr = mod_xy(w/2.0, h/2.0)
     bl = mod_xy(-w/2.0, -h/2.0)
     br = mod_xy(w/2.0, -h/2.0)
-    pts =mod_pts((tl, tr, br, bl,))
-    poly = mod_poly(pts, mod_layer(layer), mod_width(pwidth))
+    pts = mod_pts((tl, tr, br, bl))
+    poly = mod_poly(pts, layer, pwidth)
     self.add_shape(poly)
+
+  def add_rect(self, w, h, layer, pwidth):
+    """add a w x h rectangle centered on the origin"""
+    w = float(w)
+    h = float(h)
+    tl = point(-w/2.0, h/2.0)
+    tr = point(w/2.0, h/2.0)
+    bl = point(-w/2.0, -h/2.0)
+    br = point(w/2.0, -h/2.0)
+    self.add_shape(mod_line(tl, tr, layer, pwidth))
+    self.add_shape(mod_line(tr, br, layer, pwidth))
+    self.add_shape(mod_line(br, bl, layer, pwidth))
+    self.add_shape(mod_line(bl, tl, layer, pwidth))
 
   def tags_str(self):
     return '"%s"' % ' '.join([str(x) for x in self.tags])
