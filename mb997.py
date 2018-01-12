@@ -16,7 +16,7 @@ tags = (name, 'STM32', 'STM32F4', 'STM32F407', 'Discovery',)
 url = 'http://www.st.com/en/evaluation-tools/stm32f4discovery.html'
 
 # (connector, number, name, type)
-all_pins = (
+pins = (
   ( # port a
     (1, 12, 'SW_PUSH/PA0', 'B'),
     (1, 11, 'system_reset/PA1', 'B'),
@@ -152,19 +152,7 @@ p_height = 17
 rw = 800
 rh = ((p_height - 1) * p_delta) + (2 * r_extra)
 
-def set_pins(unit, pins, prefix, w, h):
-  """add the pins to the component unit"""
-  for (pin_number, pin_name, pin_type) in pins:
-    p = kicad.lib_pin('%d.%d' % (prefix, pin_number), pin_name)
-    x = (-w/2 - p_len, w/2 + p_len)[pin_number & 1 == 0]
-    y = h/2 - r_extra + ((pin_number - 1) >> 1) * -p_delta
-    p.ofs_xy(x, y)
-    p.set_orientation(('R', 'L')[pin_number % 2 == 0])
-    p.set_type(pin_type)
-    p.set_length(p_len)
-    unit.add_pin(p)
-
-def add_pins(unit, pins, w, h):
+def lib_add_pins(unit, pins, w, h):
   # add the pins to the unit"""
   i = 0
   for (prefix, pin_number, pin_name, pin_type) in pins:
@@ -178,25 +166,33 @@ def add_pins(unit, pins, w, h):
     unit.add_pin(p)
     i += 1
 
-def add_units(lib, all_pins):
+def lib_add_units(lib, pins):
   # add the units to the component"""
-  for unit_pins in all_pins:
+  for unit_pins in pins:
     u = kicad.lib_unit()
     u.add_shape(kicad.lib_rect(rw, rh))
-    add_pins(u, unit_pins, rw, rh)
+    lib_add_pins(u, unit_pins, rw, rh)
     lib.add_unit(u)
 
 lib = kicad.lib_component(name, 'M')
 lib.get_text(0).set_bl().ofs_xy(-rw/2, rh/2 + 50) # set the reference location
 lib.get_text(1).set_tl().ofs_xy(-rw/2, -rh/2 - 50) # set the name location
 lib.add_footprint('ggm', name)
-add_units(lib, all_pins)
+lib_add_units(lib, pins)
 
 #-----------------------------------------------------------------------------
 # pcb footprint
 
+def mod_add_pads(mod, pins):
+  p_sz = kicad.mil2mm(68)
+  h_sz = kicad.mil2mm(40)
+  p = kicad.mod_pad('1', 'thru_hole', 'circle', ('*.Cu', '*.Mask'))
+  p.set_xy(0,0).set_size(p_sz, p_sz).set_drill(h_sz)
+  mod.add_pad(p)
+
 mod = kicad.mod_module(name, descr)
 mod.add_tags(tags)
+mod_add_pads(mod, pins)
 
 t = kicad.mod_text('REF**', 'reference')
 t.set_layer('F.SilkS')
@@ -207,7 +203,5 @@ t.set_layer('F.Fab')
 mod.add_shape(t)
 
 mod.add_rect(66, 97, 'F.CrtYd', 0.05)
-
-mod.add_pad(kicad.mod_pad('10', ptype='smd', shape='rect'))
 
 #-----------------------------------------------------------------------------

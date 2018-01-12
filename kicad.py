@@ -145,10 +145,10 @@ class mod_rect_delta(object):
 class mod_drill(object):
   """footprint drill"""
 
-  def __init__(self, size=0.0, xofs=0.0, yofs=0.0):
-    self.size = size
-    self.xofs = xofs
-    self.yofs = yofs
+  def __init__(self, size, xofs=0, yofs=0):
+    self.size = float(size)
+    self.xofs = float(xofs)
+    self.yofs = float(yofs)
 
   def __str__(self):
     if (self.xofs != 0.0) or (self.yofs != 0.0):
@@ -208,26 +208,19 @@ class mod_layers(object):
 
 #-----------------------------------------------------------------------------
 
-ptypes = ('thru_hole', 'smd', 'connect', 'np_thru_hole')
-pshapes = ('circle', 'rect', 'oval', 'trapezoid')
+pad_types = ('thru_hole', 'smd', 'connect', 'np_thru_hole')
+pad_shapes = ('circle', 'rect', 'oval', 'trapezoid')
 
 class mod_pad(object):
   """footprint pad"""
 
-  def __init__(self, name, ptype='smd', shape='rect'):
-    assert ptype in ptypes, 'bad pad type %s' % ptype
-    assert shape in pshapes, 'bad pad shape %s' % shape
+  def __init__(self, name, pad_type, pad_shape, layers):
+    assert pad_type in pad_types, 'bad pad type %s' % ptype
+    assert pad_shape in pad_shapes, 'bad pad shape %s' % shape
     self.name = name # pin number or name (string)
-    self.ptype = ptype # pad type
-    self.shape = shape
-    self.at = mod_at(0, 0)
-    self.size = mod_size(0, 0)
-    self.rect_delta = mod_rect_delta()
-    self.drill = mod_drill()
-    if self.ptype in ('thru_hole', 'np_thru_hole'):
-      self.layers = mod_layers(('*.Cu', '*.Mask', 'F.SilkS'))
-    else:
-      self.layers = mod_layers(('F.Cu', 'F.Paste', 'F.Mask'))
+    self.pad_type = pad_type # pad type
+    self.pad_shape = pad_shape
+    self.layers = mod_layers(layers)
     # TODO
     # drill oval
     # die_length
@@ -239,16 +232,35 @@ class mod_pad(object):
     # thermal_width
     # thermal_gap
 
+  def set_xy(self, x, y):
+    """set the xy position"""
+    self.at = mod_at(x, y)
+    return self
+
+  def set_size(self, w, h):
+    """set the pad size"""
+    self.size = mod_size(w, h)
+    return self
+
+  def set_drill(self, s):
+    """set the drill size"""
+    self.drill = mod_drill(s)
+    return self
+
   def __str__(self):
     s = []
     s.append('%s' % self.name)
-    s.append('%s' % self.ptype)
-    s.append('%s' % self.shape)
+    s.append('%s' % self.pad_type)
+    s.append('%s' % self.pad_shape)
+    assert self.at is not None, 'pad does not have at location'
     s.append(str(self.at))
+    assert self.size is not None, 'no pad size defined'
     s.append(str(self.size))
-    if self.shape == 'trapezoid':
+    if self.pad_shape == 'trapezoid':
+      assert self.rect_delta is not None, 'no pad rect_delta defined'
       s.append(str(self.rect_delta))
-    if self.ptype in ('thru_hole', 'np_thru_hole'):
+    if self.pad_type in ('thru_hole', 'np_thru_hole'):
+      assert self.drill is not None, 'no pad drill defined'
       s.append(str(self.drill))
     s.append(str(self.layers))
     return '(pad %s)' % ' '.join(s)
@@ -382,7 +394,7 @@ class mod_module(object):
     self.tags.extend(t)
 
   def add_pad(self, p):
-    if p.ptype == 'smd':
+    if p.pad_type == 'smd':
       self.attr = 'smd'
     self.pads.append(p)
 
