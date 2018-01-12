@@ -183,16 +183,26 @@ lib_add_units(lib, pins)
 #-----------------------------------------------------------------------------
 # pcb footprint
 
-def mod_add_pads(mod, pins):
-  p_sz = kicad.mil2mm(68)
-  h_sz = kicad.mil2mm(40)
-  p = kicad.mod_pad('1', 'thru_hole', 'circle', ('*.Cu', '*.Mask'))
-  p.set_xy(0,0).set_size(p_sz, p_sz).set_drill(h_sz)
-  mod.add_pad(p)
+def mod_add_pads(mod, pins, x0, y0):
+  x0 = kicad.mil2mm(x0)
+  y0 = kicad.mil2mm(y0)
+  pad_size = kicad.mil2mm(68)
+  hole_size = kicad.mil2mm(40)
+  pin_spacing = kicad.mil2mm(100)
+  row_spacing = kicad.mil2mm(2000)
+  for unit_pins in pins:
+    for (prefix, pin_number, pin_name, pin_type) in unit_pins:
+      pad_name = '%d.%d' % (prefix, pin_number)
+      p = kicad.mod_pad(pad_name, 'thru_hole', 'circle', ('*.Cu', '*.Mask'))
+      p.set_size(pad_size, pad_size).set_drill(hole_size)
+      x = x0 + (prefix - 1) * row_spacing + ((pin_number - 1) & 1) * pin_spacing
+      y = y0 + ((pin_number - 1) >> 1) * pin_spacing
+      p.set_xy(x, y)
+      mod.add_pad(p)
 
 mod = kicad.mod_module(name, descr)
 mod.add_tags(tags)
-mod_add_pads(mod, pins)
+mod_add_pads(mod, pins, -1050, -600)
 
 t = kicad.mod_text('REF**', 'reference')
 t.set_layer('F.SilkS')
