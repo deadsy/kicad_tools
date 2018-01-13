@@ -29,6 +29,14 @@ def tedit_secs():
   """return number of seconds since 1970/1/1"""
   return int(time.time())
 
+def mm(d):
+  s = '%.3f' % d
+  # strip trailing 0's
+  s = s.rstrip('0')
+  # strip trailing .
+  s = s.rstrip('.')
+  return s
+
 #-----------------------------------------------------------------------------
 
 class point(object):
@@ -55,9 +63,9 @@ class mod_at(object):
 
   def __str__(self):
     if self.a == 0:
-      return '(at %.2f %.2f)' % (self.x, self.y)
+      return '(at %s %s)' % (mm(self.x), mm(self.y))
     else:
-      return '(at %.2f %.2f %.2f)' % (self.x, self.y, self.a)
+      return '(at %s %s %s)' % (mm(self.x), mm(self.y), mm(self.a))
 
 #-----------------------------------------------------------------------------
 
@@ -69,7 +77,7 @@ class mod_size(object):
     self.h = float(h)
 
   def __str__(self):
-    return '(size %.2f %.2f)' % (self.w, self.h)
+    return '(size %s %s)' % (mm(self.w), mm(self.h))
 
 #-----------------------------------------------------------------------------
 
@@ -80,7 +88,7 @@ class mod_width(object):
     self.w = float(w)
 
   def __str__(self):
-    return '(width %.2f)' % self.w
+    return '(width %s)' % mm(self.w)
 
 #-----------------------------------------------------------------------------
 
@@ -92,7 +100,7 @@ class mod_xy(object):
     self.y = float(y)
 
   def __str__(self):
-    return '(xy %.2f %.2f)' % (self.x, self.y)
+    return '(xy %s %s)' % (mm(self.x), mm(self.y))
 
 #-----------------------------------------------------------------------------
 
@@ -103,7 +111,7 @@ class mod_start(object):
     self.p = p
 
   def __str__(self):
-    return '(start %.2f %.2f)' % (self.p.x, self.p.y)
+    return '(start %s %s)' % (mm(self.p.x), mm(self.p.y))
 
 #-----------------------------------------------------------------------------
 
@@ -114,7 +122,7 @@ class mod_end(object):
     self.p = p
 
   def __str__(self):
-    return '(end %.2f %.2f)' % (self.p.x, self.p.y)
+    return '(end %s %s)' % (mm(self.p.x), mm(self.p.y))
 
 #-----------------------------------------------------------------------------
 
@@ -138,7 +146,7 @@ class mod_rect_delta(object):
     self.dy = dy
 
   def __str__(self):
-    return '(rect_delta %.2f %.2f)' % (self.dy, self.dx)
+    return '(rect_delta %s %s)' % (mm(self.dy), mm(self.dx))
 
 #-----------------------------------------------------------------------------
 
@@ -152,9 +160,9 @@ class mod_drill(object):
 
   def __str__(self):
     if (self.xofs != 0.0) or (self.yofs != 0.0):
-      return '(drill %.2f (offset %.2f %.2f))' % (self.size, self.xofs, self.yofs)
+      return '(drill %s (offset %s %s))' % (mm(self.size), mm(self.xofs), mm(self.yofs))
     else:
-      return '(drill %.2f)' % self.size
+      return '(drill %s)' % mm(self.size)
 
 #-----------------------------------------------------------------------------
 
@@ -274,7 +282,7 @@ class mod_font(object):
     self.thickness = 0.15
 
   def __str__(self):
-    return '(font %s (thickness %.2f))' % (self.size, self.thickness)
+    return '(font %s (thickness %s))' % (self.size, mm(self.thickness))
 
 #-----------------------------------------------------------------------------
 
