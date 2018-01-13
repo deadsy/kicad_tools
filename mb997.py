@@ -109,20 +109,20 @@ pins = (
   ),
   ( # misc
     (1, 6, 'NRST', 'I'),
-    (1, 48, 'NC', 'N'),
     (2, 7, 'ph0_osc_in/PH0', 'B'),
     (2, 8, 'ph1_osc_out/PH1', 'B'),
     (2, 21, 'BOOT0', 'I'),
+    (1, 48, 'NC', 'N'),
   ),
   ( # power
-    (1, 3, 'VDD', 'w'),
-    (1, 4, 'VDD', 'w'),
-    (2, 22, 'VDD', 'w'),
-    (2, 3, '5V', 'w'),
-    (2, 4, '5V', 'w'),
-    (2, 5, '3V', 'w'),
-    (2, 6, '3V', 'w'),
-    (1, 1, 'GND', 'W'),
+    (1, 3, 'VDD', 'w'), # power output
+    (1, 4, 'VDD', 'W'),
+    (2, 22, 'VDD', 'W'),
+    (2, 3, '5V', 'w'), # power output
+    (2, 4, '5V', 'W'),
+    (2, 5, '3V', 'w'), # power output
+    (2, 6, '3V', 'W'),
+    (1, 1, 'GND', 'w'), # power output
     (1, 2, 'GND', 'W'),
     (1, 5, 'GND', 'W'),
     (1, 23, 'GND', 'W'),
@@ -136,6 +136,7 @@ pins = (
 )
 
 def pad_name(prefix, pin_number):
+  """return the pad name"""
   return '%s%d' % (('A', 'B')[prefix == 2], pin_number)
 
 #-----------------------------------------------------------------------------
@@ -186,33 +187,70 @@ lib_add_units(lib, pins)
 #-----------------------------------------------------------------------------
 # pcb footprint
 
+def pad_xy(prefix, pin_number):
+  """return the pad x,y position"""
+  pin_spacing = kicad.mil2mm(100)
+  row_spacing = kicad.mil2mm(2000)
+  x = (prefix - 1) * row_spacing + ((pin_number - 1) & 1) * pin_spacing
+  y = ((pin_number - 1) >> 1) * pin_spacing
+  return (x, y)
+
 def mod_add_pads(mod, pins):
   pad_size = kicad.mil2mm(68)
   hole_size = kicad.mil2mm(40)
-  pin_spacing = kicad.mil2mm(100)
-  row_spacing = kicad.mil2mm(2000)
   for unit_pins in pins:
     for (prefix, pin_number, pin_name, pin_type) in unit_pins:
       pad_shape = ('circle', 'rect')[pin_number == 1 and prefix == 1]
       p = kicad.mod_pad(pad_name(prefix, pin_number), 'thru_hole', pad_shape, ('*.Cu', '*.Mask'))
       p.set_size(pad_size, pad_size).set_drill(hole_size)
-      x = (prefix - 1) * row_spacing + ((pin_number - 1) & 1) * pin_spacing
-      y = ((pin_number - 1) >> 1) * pin_spacing
+      (x, y) = pad_xy(prefix, pin_number)
       p.set_xy(x, y)
       mod.add_pad(p)
 
+def mod_add_connector_outline(mod):
+  """add the connector outlines"""
+  cw = kicad.mil2mm(200)
+  ch = kicad.mil2mm(25 * 100)
+  for cx, cy in (pad_xy(1, 1), pad_xy(2, 1)):
+    cx -= kicad.mil2mm(50)
+    cy -= kicad.mil2mm(50)
+    mod.add_rect(cx, cy, cw, ch, 'F.SilkS', 0.12)
+
+def mod_add_board_outline(mod):
+  """add a board outline"""
+  bw = 66.0
+  bh = 97.0
+  bx = (kicad.mil2mm(2100) - bw)/2.0
+  by = kicad.mil2mm(-1350)
+  mod.add_rect(bx, by, bw, bh, 'F.CrtYd', 0.05)
+  mod.add_rect(bx, by, bw, bh, 'F.Fab', 0.1)
+
+def mod_add_text(mod):
+  # silk reference
+  t = kicad.mod_text('REF**', 'reference', 'F.SilkS')
+  t.set_xy(kicad.mil2mm(25), kicad.mil2mm(-100))
+  mod.add_shape(t)
+  # silk pin 1
+  t = kicad.mod_text('A1', 'user', 'F.SilkS')
+  t.set_xy(kicad.mil2mm(-100), 0)
+  mod.add_shape(t)
+  # fab name at top left
+  t = kicad.mod_text(name, 'value', 'F.Fab')
+  t.set_xy(kicad.mil2mm(-125), kicad.mil2mm(-1300))
+  mod.add_shape(t)
+  # fab reference at top left
+  t = kicad.mod_text('%R', 'user', 'F.Fab')
+  t.set_xy(kicad.mil2mm(-125), kicad.mil2mm(-1200))
+  mod.add_shape(t)
+
+def mod_init(mod):
+  mod.add_tags(tags)
+  mod_add_pads(mod, pins)
+  mod_add_connector_outline(mod)
+  mod_add_board_outline(mod)
+  mod_add_text(mod)
+
 mod = kicad.mod_module(name, descr)
-mod.add_tags(tags)
-mod_add_pads(mod, pins)
-
-t = kicad.mod_text('REF**', 'reference')
-t.set_layer('F.SilkS')
-mod.add_shape(t)
-
-t = kicad.mod_text(name, 'value')
-t.set_layer('F.Fab')
-mod.add_shape(t)
-
-mod.add_rect(66, 97, 'F.CrtYd', 0.05)
+mod_init(mod)
 
 #-----------------------------------------------------------------------------

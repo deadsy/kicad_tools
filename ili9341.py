@@ -20,26 +20,34 @@ descr = 'LCD Module 2.8 inch 240x320 SPI TFT with touch sensor and SD card'
 tags = (name, 'LCD',)
 url = 'https://www.amazon.com/gp/product/B017FZTIO6/ref=od_aui_detailpages00?ie=UTF8&psc=1'
 
+# pin_number, pin_name, pin_type, pad_position
 pins = (
-  (1, 'LCD_SDO', 'O'),
-  (2, 'LCD_LED', 'I'),
-  (3, 'LCD_SCK', 'I'),
-  (4, 'LCD_SDI', 'I'),
-  (5, 'LCD_DC', 'I'),
-  (6, 'LCD_RESET', 'I'),
-  (7, 'LCD_CS', 'I'),
-  (8, 'GND', 'W'),
-  (9, 'VCC', 'W'),
-  (10, 'TS_IRQ', 'O'),
-  (11, 'TS_DO', 'O'),
-  (12, 'TS_DI', 'I'),
-  (13, 'TS_CS', 'I'),
-  (14, 'TS_CLK', 'I'),
-  (15, 'SD_CS', 'I'),
-  (16, 'SD_MOSI', 'I'),
-  (17, 'SD_MISO', 'O'),
-  (18, 'SD_CLK', 'I'),
+  (1, 'VCC', 'W', (0, 0)),
+  (3, 'LCD_CS', 'I', (0, 2)),
+  (4, 'LCD_RESET', 'I', (0, 3)),
+  (5, 'LCD_DC', 'I', (0, 4)),
+  (6, 'LCD_SDI', 'I', (0, 5)),
+  (7, 'LCD_SCK', 'I', (0, 6)),
+  (8, 'LCD_LED', 'I', (0, 7)),
+  (9, 'LCD_SDO', 'O', (0, 8)),
+  (10, 'TS_CLK', 'I', (0, 9)),
+  (11, 'TS_CS', 'I', (0, 10)),
+  (12, 'TS_DI', 'I', (0, 11)),
+  (13, 'TS_DO', 'O', (0, 12)),
+  (14, 'TS_IRQ', 'O', (0, 13)),
+  (15, 'SD_CS', 'I', (1, 0)),
+  (16, 'SD_MOSI', 'I', (1, 1)),
+  (17, 'SD_MISO', 'O', (1, 2)),
+  (18, 'SD_CLK', 'I', (1, 3)),
+  (2, 'GND', 'W', (0, 1)),
 )
+
+board_width = 50.0
+board_height = 86.0
+
+def pad_name(pin_number):
+  """return the pad name"""
+  return '%d' % pin_number
 
 #-----------------------------------------------------------------------------
 # part documentation
@@ -59,15 +67,17 @@ rh = ((len(pins) - 1) * p_delta) + (2 * r_extra)
 
 def set_pins(unit, pins, w, h):
   """add the pins to the component unit"""
-  for (pin_number, pin_name, pin_type) in pins:
-    p = kicad.lib_pin('%d' % pin_number, pin_name)
+  i = 0
+  for (pin_number, pin_name, pin_type, _) in pins:
+    p = kicad.lib_pin(pad_name(pin_number), pin_name)
     x = w/2 + p_len
-    y = h/2 - r_extra - ((pin_number - 1) * p_delta)
+    y = h/2 - r_extra - (i * p_delta)
     p.ofs_xy(x, y)
     p.set_orientation('L')
     p.set_type(pin_type)
     p.set_length(p_len)
     unit.add_pin(p)
+    i += 1
 
 lib = kicad.lib_component(name, 'M')
 lib.get_text(0).set_bl().ofs_xy(-rw/2, rh/2 + 50) # set the reference location
@@ -85,25 +95,95 @@ lib.ofs_xy(0, 50)
 #-----------------------------------------------------------------------------
 # pcb footprint
 
+def pad_xy(pad_position):
+  """return the pad x,y position"""
+  pin_spacing = kicad.mil2mm(100)
+  (group, idx) = pad_position
+  x = group * kicad.mil2mm(500)
+  y = group * kicad.mil2mm(-3175)
+  x += idx * pin_spacing
+  return (x, y)
+
 def mod_add_pads(mod, pins):
-  p_sz = kicad.mil2mm(68)
-  h_sz = kicad.mil2mm(40)
-  p = kicad.mod_pad('1', 'thru_hole', 'circle', ('*.Cu', '*.Mask'))
-  p.set_xy(0,0).set_size(p_sz, p_sz).set_drill(h_sz)
-  mod.add_pad(p)
+  pad_size = kicad.mil2mm(68)
+  hole_size = kicad.mil2mm(40)
+  for (pin_number, pin_name, pin_type, pad_position) in pins:
+    pad_shape = ('circle', 'rect')[pin_number == 1]
+    p = kicad.mod_pad(pad_name(pin_number), 'thru_hole', pad_shape, ('*.Cu', '*.Mask'))
+    p.set_size(pad_size, pad_size).set_drill(hole_size)
+    (x, y) = pad_xy(pad_position)
+    p.set_xy(x, y)
+    mod.add_pad(p)
+
+def mod_add_connector_outline(mod):
+  """add the connector outlines"""
+  ch = kicad.mil2mm(100)
+  dx = kicad.mil2mm(50)
+  dy = kicad.mil2mm(50)
+  # large connector, group = 0
+  (cx, cy) = pad_xy((0, 0))
+  cx -= dx
+  cy -= dy
+  mod.add_rect(cx, cy, kicad.mil2mm(14 * 100), ch, 'F.SilkS', 0.12)
+  # small connector, group = 1
+  (cx, cy) = pad_xy((1, 0))
+  cx -= dx
+  cy -= dy
+  mod.add_rect(cx, cy, kicad.mil2mm(4 * 100), ch, 'F.SilkS', 0.12)
+
+def mod_add_board_outline(mod):
+  """add a board outline"""
+  bw = board_width
+  bh = board_height
+  bx = (kicad.mil2mm(1300) - bw)/2.0
+  by = kicad.mil2mm(50) - bh
+  mod.add_rect(bx, by, bw, bh, 'F.CrtYd', 0.05)
+  mod.add_rect(bx, by, bw, bh, 'F.Fab', 0.1)
+
+def mod_add_mounting_holes(mod):
+  hole_size = kicad.mil2mm(120)
+  pad_size = kicad.mil2mm(150)
+  w = 44.0
+  h = 76.0
+  x0 = (kicad.mil2mm(1300) - w) / 2.0
+  y0 = -4.0
+  tl = (x0, y0 - h)
+  tr = (x0 + w, y0 - h)
+  bl = (x0, y0)
+  br = (x0 + w, y0)
+  for (x, y) in (tl, tr, bl, br):
+    p = kicad.mod_pad('', 'thru_hole', 'circle', ('*.Cu', '*.Mask'))
+    p.set_size(pad_size, pad_size).set_drill(hole_size)
+    p.set_xy(x, y)
+    mod.add_pad(p)
+
+def mod_add_text(mod):
+  # silk reference
+  t = kicad.mod_text('REF**', 'reference', 'F.SilkS')
+  t.set_xy(0, kicad.mil2mm(-100))
+  mod.add_shape(t)
+  # silk pin 1
+  t = kicad.mod_text('1', 'user', 'F.SilkS')
+  t.set_xy(kicad.mil2mm(-100), 0)
+  mod.add_shape(t)
+  # fab name at top left
+  t = kicad.mod_text(name, 'value', 'F.Fab')
+  t.set_xy(kicad.mil2mm(0), kicad.mil2mm(-3250))
+  mod.add_shape(t)
+  # fab reference at top left
+  t = kicad.mod_text('%R', 'user', 'F.Fab')
+  t.set_xy(kicad.mil2mm(0), kicad.mil2mm(-3150))
+  mod.add_shape(t)
+
+def mod_init(mod):
+  mod.add_tags(tags)
+  mod_add_pads(mod, pins)
+  mod_add_connector_outline(mod)
+  mod_add_board_outline(mod)
+  mod_add_mounting_holes(mod)
+  mod_add_text(mod)
 
 mod = kicad.mod_module(name, descr)
-mod.add_tags(tags)
-mod_add_pads(mod, pins)
-
-t = kicad.mod_text('REF**', 'reference')
-t.set_layer('F.SilkS')
-mod.add_shape(t)
-
-t = kicad.mod_text(name, 'value')
-t.set_layer('F.Fab')
-mod.add_shape(t)
-
-mod.add_rect(50, 86, 'F.CrtYd', 0.05)
+mod_init(mod)
 
 #-----------------------------------------------------------------------------

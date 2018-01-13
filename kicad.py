@@ -225,7 +225,7 @@ class mod_pad(object):
   def __init__(self, name, pad_type, pad_shape, layers):
     assert pad_type in pad_types, 'bad pad type %s' % ptype
     assert pad_shape in pad_shapes, 'bad pad shape %s' % shape
-    self.name = name # pin number or name (string)
+    self.name = (name, '""')[len(name) == 0]
     self.pad_type = pad_type # pad type
     self.pad_shape = pad_shape
     self.layers = mod_layers(layers)
@@ -298,31 +298,28 @@ class mod_effects(object):
 
 #-----------------------------------------------------------------------------
 
-ttypes = ('reference', 'value', 'user')
+text_types = ('reference', 'value', 'user')
 
 class mod_text(object):
   """footprint fp_text element"""
 
-  def __init__(self, text, ttype, layer='F.SilkS'):
-    assert ttype in ttypes, 'bad ttype %s' % ttype
+  def __init__(self, text, text_type, layer):
+    assert text_type in text_types, 'bad ttype %s' % ttype
     self.text = text
-    self.ttype = ttype
-    self.at = mod_at(0, 0)
+    self.text_type = text_type
     self.layer = mod_layer(layer)
     self.effects = mod_effects()
+    self.at = None
 
-  def ofs_xy(self, xofs, yofs):
-    """offset the xy position"""
-    self.at.ofs_xy(xofs, yofs)
-    return self
-
-  def set_layer(self, l):
-    self.layer = mod_layer(l)
+  def set_xy(self, x, y):
+    """set the xy position"""
+    self.at = mod_at(x, y)
     return self
 
   def __str__(self):
     s = []
-    s.append('(fp_text %s %s %s %s' % (self.ttype, self.text, self.at, self.layer))
+    assert self.at is not None, 'need to set the text position'
+    s.append('(fp_text %s %s %s %s' % (self.text_type, self.text, self.at, self.layer))
     s.append(indent(str(self.effects)))
     s.append(')')
     return '\n'.join(s)
@@ -419,14 +416,16 @@ class mod_module(object):
     poly = mod_poly(pts, layer, pwidth)
     self.add_shape(poly)
 
-  def add_rect(self, w, h, layer, pwidth):
+  def add_rect(self, x, y, w, h, layer, pwidth):
     """add a w x h rectangle centered on the origin"""
+    x = float(x)
+    y = float(y)
     w = float(w)
     h = float(h)
-    tl = point(-w/2.0, h/2.0)
-    tr = point(w/2.0, h/2.0)
-    bl = point(-w/2.0, -h/2.0)
-    br = point(w/2.0, -h/2.0)
+    tl = point(x, y)
+    tr = point(x + w, y)
+    bl = point(x, y + h)
+    br = point(x + w, y + h)
     self.add_shape(mod_line(tl, tr, layer, pwidth))
     self.add_shape(mod_line(tr, br, layer, pwidth))
     self.add_shape(mod_line(br, bl, layer, pwidth))
