@@ -135,6 +135,9 @@ pins = (
   ),
 )
 
+def pad_name(prefix, pin_number):
+  return '%s%d' % (('A', 'B')[prefix == 2], pin_number)
+
 #-----------------------------------------------------------------------------
 # part documentation
 
@@ -156,7 +159,7 @@ def lib_add_pins(unit, pins, w, h):
   # add the pins to the unit"""
   i = 0
   for (prefix, pin_number, pin_name, pin_type) in pins:
-    p = kicad.lib_pin('%d.%d' % (prefix, pin_number), pin_name)
+    p = kicad.lib_pin(pad_name(prefix, pin_number), pin_name)
     x = w/2 + p_len
     y = h/2 - r_extra - (i * p_delta)
     p.ofs_xy(x, y)
@@ -183,26 +186,24 @@ lib_add_units(lib, pins)
 #-----------------------------------------------------------------------------
 # pcb footprint
 
-def mod_add_pads(mod, pins, x0, y0):
-  x0 = kicad.mil2mm(x0)
-  y0 = kicad.mil2mm(y0)
+def mod_add_pads(mod, pins):
   pad_size = kicad.mil2mm(68)
   hole_size = kicad.mil2mm(40)
   pin_spacing = kicad.mil2mm(100)
   row_spacing = kicad.mil2mm(2000)
   for unit_pins in pins:
     for (prefix, pin_number, pin_name, pin_type) in unit_pins:
-      pad_name = '%d.%d' % (prefix, pin_number)
-      p = kicad.mod_pad(pad_name, 'thru_hole', 'circle', ('*.Cu', '*.Mask'))
+      pad_shape = ('circle', 'rect')[pin_number == 1 and prefix == 1]
+      p = kicad.mod_pad(pad_name(prefix, pin_number), 'thru_hole', pad_shape, ('*.Cu', '*.Mask'))
       p.set_size(pad_size, pad_size).set_drill(hole_size)
-      x = x0 + (prefix - 1) * row_spacing + ((pin_number - 1) & 1) * pin_spacing
-      y = y0 + ((pin_number - 1) >> 1) * pin_spacing
+      x = (prefix - 1) * row_spacing + ((pin_number - 1) & 1) * pin_spacing
+      y = ((pin_number - 1) >> 1) * pin_spacing
       p.set_xy(x, y)
       mod.add_pad(p)
 
 mod = kicad.mod_module(name, descr)
 mod.add_tags(tags)
-mod_add_pads(mod, pins, -1050, -600)
+mod_add_pads(mod, pins)
 
 t = kicad.mod_text('REF**', 'reference')
 t.set_layer('F.SilkS')
