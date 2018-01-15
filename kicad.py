@@ -417,7 +417,7 @@ class mod_module(object):
     self.add_shape(poly)
 
   def add_rect(self, x, y, w, h, layer, pwidth):
-    """add a w x h rectangle centered on the origin"""
+    """add a w x h rectangle with top left corner at x,y"""
     x = float(x)
     y = float(y)
     w = float(w)
