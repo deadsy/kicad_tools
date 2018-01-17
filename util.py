@@ -8,6 +8,24 @@ Utility Functions
 
 import kicad
 
+
+#-----------------------------------------------------------------------------
+
+# map a user friendly string onto the kicad pin type
+pin_types = {
+ 'in': 'I', # Input
+ 'out': 'O', # Output
+ 'inout': 'B', # Bidirectional
+ 'tristate': 'T', # Tristate
+ 'passive': 'P', # Passive
+ 'open_collector': 'C', # Open Collector
+ 'open_emitter': 'E', # Open Emitter
+ 'nc': 'N', # Non-connected
+ 'unspecified': 'U', # Unspecified
+ 'power_in': 'W', # Power input
+ 'power_out': 'w', # Power output
+}
+
 #-----------------------------------------------------------------------------
 
 def build_symbol(name, reference, pins, w):
@@ -41,5 +59,74 @@ def build_symbol(name, reference, pins, w):
   # add the unit
   lib.add_unit(u)
   return lib
+
+#-----------------------------------------------------------------------------
+
+
+class pins(object):
+
+  def __init__(self):
+    self.units = []
+
+  def add_unit(self, u):
+    self.units.append(u)
+
+class unit(object):
+
+  def __init__(self):
+    self.groups = []
+
+  def add_group(self, g):
+    self.groups.append(g)
+
+class group(object):
+
+  def __init__(self, align):
+    assert align in ('L','R','T','B'), 'bad alignment %s' % align
+    self.align = align
+    self.pins = []
+
+  def add_pin(self, p):
+    self.pins.append(p)
+
+class pin(object):
+
+  def __init__(self, name, pin_type):
+    assert pin_type in pin_types.keys(), 'bad pin type %s' % pin_type
+    self.name = name
+    self.ptype = pin_type
+
+#-----------------------------------------------------------------------------
+
+class component(object):
+
+  def __init__(self, name, descr):
+    self.name = name
+    self.descr = descr
+    self.tags = [name,]
+
+  def add_tags(self, tags):
+    """add tags to the component"""
+    self.tags.extend(tags)
+    return self
+
+  def set_url(self, url):
+    self.url = url
+    return self
+
+  def lib(self, fp=None):
+    """return the kicad schematic symbol string"""
+    return ''
+
+  def dcm_str(self):
+    """return the kicad device documentation string"""
+    dcm = kicad.dcm_component(self.name, self.descr)
+    dcm.add_keywords(self.tags)
+    dcm.add_url(self.url)
+    return str(dcm)
+
+  def mod_str(self, fp=None):
+    """return the kicad pcb footprint string"""
+    return ''
 
 #-----------------------------------------------------------------------------
