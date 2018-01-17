@@ -6,54 +6,87 @@ TLC 5940
 """
 #-----------------------------------------------------------------------------
 
-import util
+from util import *
 
 #-----------------------------------------------------------------------------
 
-tlc5940 = util.component('TLC5940', '16-Channel LED Driver')
+tlc5940 = component('TLC5940', '16-Channel LED Driver')
 tlc5940.add_tags(('LED', 'PWM'))
 tlc5940.set_url('http://www.ti.com/product/TLC5940')
 
 #-----------------------------------------------------------------------------
 
+pins = (
+  pin('VCC', 'power_in'),
+  pin('GND', 'power_in'),
+  pin('BLANK', 'in'),
+  pin('XLAT', 'in'),
+  pin('SCLK', 'in'),
+  pin('SIN', 'in'),
+  pin('VPRG', 'in'),
+  pin('IREF', 'in'),
+  pin('DCPRG', 'in'),
+  pin('GSCLK', 'in'),
+  pin('SOUT', 'out'),
+  pin('XERR', 'out'),
+  pin('OUT0', 'out'),
+  pin('OUT1', 'out'),
+  pin('OUT2', 'out'),
+  pin('OUT3', 'out'),
+  pin('OUT4', 'out'),
+  pin('OUT5', 'out'),
+  pin('OUT6', 'out'),
+  pin('OUT7', 'out'),
+  pin('OUT8', 'out'),
+  pin('OUT9', 'out'),
+  pin('OUT10', 'out'),
+  pin('OUT11', 'out'),
+  pin('OUT12', 'out'),
+  pin('OUT13', 'out'),
+  pin('OUT14', 'out'),
+  pin('OUT15', 'out'),
+)
 
-g0 = util.pin_group('T')
-g0.add_pin('VCC', 'power_in')
+tlc5940.add_pins(pins)
 
-g1 = util.pin_group('B')
-g1.add_pin('GND', 'power_in')
+#-----------------------------------------------------------------------------
+# dip28 footprint
 
-g2 = util.pin_group('L')
-g2.add_pin('BLANK', 'in')
-g2.add_pin('XLAT', 'in')
-g2.add_pin('SCLK', 'in')
-g2.add_pin('SIN', 'in')
-g2.add_pin('VPRG', 'in')
-g2.add_pin('IREF', 'in')
-g2.add_pin('DCPRG', 'in')
-g2.add_pin('GSCLK', 'in')
+dip28 = footprint('DIP28')
 
-g3 = util.pin_group('R')
+pin_map = {
+  'VCC': (1,),
+  'GND': (2,),
+  'BLANK': (3,),
+  'XLAT': (4,),
+  'SCLK': (5,),
+  'SIN': (6,),
+  'VPRG': (7,),
+  'IREF': (1,),
+  'DCPRG': (1,2,),
+  'GSCLK': (1,),
+  'SOUT': (1,),
+  'XERR': (1,),
+  'OUT0': (1,),
+  'OUT1': (1,),
+  'OUT2': (1,),
+  'OUT3': (1,),
+  'OUT4': (1,),
+  'OUT5': (1,),
+  'OUT6': (1,),
+  'OUT7': (1,),
+  'OUT8': (1,),
+  'OUT9': (1,),
+  'OUT10': (1,),
+  'OUT11': (1,),
+  'OUT12': (1,),
+  'OUT13': (1,),
+  'OUT14': (1,),
+  'OUT15': (1,),
+}
 
- util.pin('SOUT', 'out')
- util.pin('XERR', 'out')
-
- util.pin('OUT0', 'out')
- util.pin('OUT1', 'out')
- util.pin('OUT2', 'out')
- util.pin('OUT3', 'out')
- util.pin('OUT4', 'out')
- util.pin('OUT5', 'out')
- util.pin('OUT6', 'out')
- util.pin('OUT7', 'out')
- util.pin('OUT8', 'out')
- util.pin('OUT9', 'out')
- util.pin('OUT10', 'out')
- util.pin('OUT11', 'out')
- util.pin('OUT12', 'out')
- util.pin('OUT13', 'out')
- util.pin('OUT14', 'out')
- util.pin('OUT15', 'out')
+dip28.set_pin_map(pin_map)
+tlc5940.add_footprint(dip28)
 
 #-----------------------------------------------------------------------------
 
