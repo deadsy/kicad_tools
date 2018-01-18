@@ -116,41 +116,44 @@ class pin(object):
 #-----------------------------------------------------------------------------
 
 pin_length = 200 # length of schematic pin (mils)
-pin_spacing = 100 # pin spacing (mils)
+pin_corner_space = 50 # space on corner of the symbols (mils)
+pin_delta_space = 100 # pin to pin spacing (mils)
+pin_group_space = 100 # space btween pin groups (mils)
 
 class pinset(object):
+  """combined component/footprint pin set"""
 
-  def __init__(self):
+  def __init__(self, component, footprint):
+    # do a join between the component pin names and the footprint pin numbers
     self.pins = []
-
-  def add(self, pins):
-    """add some pins to the pin set"""
-    self.pins.extend(pins)
-    # check for duplicates
-    names = {}
-    for p in self.pins:
-      # check for duplicates
-      assert names.has_key(p.name) is False, 'duplicate pin name %s' % p.name
-      names[p.name] = True
+    for pin_name, pin_numbers in footprint.name2number.iteritems():
+      for pin_number in pin_numbers:
+        self.pins.append((pin_number, component.name2pin[pin_name]))
 
   def num_pins(self, side):
     """return the number of pins on a side"""
-    pins = [x for x in self.pins if x.size == side]
-    return len(pins)
+    return len([True for (_, p) in self.pins if p.side == side])
+
+  def on_side(self, side):
+    """return the pins on a side sorted by the group number"""
+    pins = [(n, p) for (n, p) in self.pins if p.side == side]
+    # sort by group
+    pins.sort(key = lambda (n, p) : p.group)
+    return pins
 
   def num_groups(self, side):
     """return the number of pin groups on a side"""
-    pins = [x for x in self.pins if x.size == side]
     groups = {}
-    for p in pins:
-      groups[p.group] = True
+    for (_ , p) in self.pins:
+      if p.side == side:      
+        groups[p.group] = True
     return len(groups.keys())
 
   def len_side(self, side):
     """return a side length large enough for the pins on this side"""
-    l = 2 * pin_spacing
-    l += (self.num_pins(side) - 1) * pin_spacing
-    l += (self.num_groups(side) - 1) * pin_spacing
+    l = 2 * pin_corner_space
+    l += (self.num_pins(side) - 1) * pin_delta_space
+    l += (self.num_groups(side) - 1) * pin_group_space
     return l
 
   def rect_size(self):
@@ -207,6 +210,12 @@ class component(object):
   def lib_str(self, fp_name=None):
     """return the kicad schematic symbol"""
     fp = self.footprint_lookup(fp_name)
+    pins = pinset(self, fp)
+    print pins.rect_size()
+    pins.on_side('T')
+    pins.on_side('B')
+    pins.on_side('L')
+    pins.on_side('R')
     return ''
 
   def dcm_str(self):
