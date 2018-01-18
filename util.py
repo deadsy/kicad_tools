@@ -13,17 +13,17 @@ import kicad
 
 # map a user friendly string onto the kicad pin type
 pin_types = {
- 'in': 'I', # Input
- 'out': 'O', # Output
- 'inout': 'B', # Bidirectional
- 'tristate': 'T', # Tristate
- 'passive': 'P', # Passive
- 'open_collector': 'C', # Open Collector
- 'open_emitter': 'E', # Open Emitter
- 'nc': 'N', # Non-connected
- 'unspecified': 'U', # Unspecified
- 'power_in': 'W', # Power input
- 'power_out': 'w', # Power output
+  'in': 'I', # Input
+  'out': 'O', # Output
+  'inout': 'B', # Bidirectional
+  'tristate': 'T', # Tristate
+  'passive': 'P', # Passive
+  'open_collector': 'C', # Open Collector
+  'open_emitter': 'E', # Open Emitter
+  'nc': 'N', # Non-connected
+  'unspecified': 'U', # Unspecified
+  'power_in': 'W', # Power input
+  'power_out': 'w', # Power output
 }
 
 #-----------------------------------------------------------------------------
@@ -46,7 +46,7 @@ def build_symbol(name, reference, pins, w):
   u = kicad.lib_unit()
   u.add_shape(kicad.lib_rect(w, h))
   # add the pins
-  for i,v in enumerate(pins):
+  for i, v in enumerate(pins):
     (pin_number, pin_name, pin_type) = v
     p = kicad.lib_pin(pin_number, pin_name)
     x = w/2 + p_len
@@ -66,14 +66,23 @@ class footprint(object):
 
   def __init__(self, name):
     self.name = name
-    self.pin_map = None
+    self.name2number = {}
+
+  def get_pin_numbers(self, pin_name):
+    """return the pin numbers associated with a pin name"""
+    return self.name2number[pin_name]
 
   def set_pin_map(self, pin_map):
     """set the pin name to pin number mapping"""
     # each pin number must be unique
-    pin_numbers = {}
-    for x in pin_map.itervalues():
-      print x
+    all_numbers = {}
+    for name, numbers in pin_map.iteritems():
+      numbers = [str(x) for x in numbers]
+      # check for duplicates
+      for number in numbers:
+        assert all_numbers.has_key(number) is False, 'duplicate pin number %s' % number
+        all_numbers[number] = True
+      self.name2number[name] = numbers
 
 
 #-----------------------------------------------------------------------------
@@ -89,7 +98,7 @@ class pin(object):
     # work out the side of the symbol the pin is on
     if side is None:
       if self.pin_type == 'out':
-       side = 'R'
+        side = 'R'
       elif pin_type == 'in':
         side = 'L'
       elif self.name in ('VCC',):
@@ -100,9 +109,54 @@ class pin(object):
         # default to right hand side
         side = 'R'
     else:
-      assert side in ('T','L','R','B'), 'bad symbol side %s' % side
+      assert side in ('T', 'L', 'R', 'B'), 'bad symbol side %s' % side
     self.side = side
 
+#-----------------------------------------------------------------------------
+
+pin_length = 200 # length of schematic pin (mils)
+pin_spacing = 100 # pin spacing (mils)
+
+class pinset(object):
+
+  def __init__(self):
+    self.pins = []
+
+  def add(self, pins):
+    """add some pins to the pin set"""
+    self.pins.extend(pins)
+    # check for duplicates
+    names = {}
+    for p in self.pins:
+      # check for duplicates
+      assert names.has_key(p.name) is False, 'duplicate pin name %s' % p.name
+      names[p.name] = True
+
+  def num_pins(self, side):
+    """return the number of pins on a side"""
+    pins = [x for x in self.pins if x.size == side]
+    return len(pins)
+
+  def num_groups(self, side):
+    """return the number of pin groups on a side"""
+    pins = [x for x in self.pins if x.size == side]
+    groups = {}
+    for p in pins:
+      groups[p.group] = True
+    return len(groups.keys())
+
+  def len_side(self, side):
+    """return a side length large enough for the pins on this side"""
+    l = 2 * pin_spacing
+    l += (self.num_pins(side) - 1) * pin_spacing
+    l += (self.num_groups(side) - 1) * pin_spacing
+    return l
+
+  def rect_size(self):
+    """return the size of a rectangular symbol large enough for all the pins"""
+    w = max(self.len_side('T'), self.len_side('B'))
+    h = max(self.len_side('L'), self.len_side('R'))
+    return (w, h)
 
 #-----------------------------------------------------------------------------
 
@@ -111,9 +165,10 @@ class component(object):
   def __init__(self, name, descr):
     self.name = name
     self.descr = descr
+    self.url = None
     self.tags = [name,]
-    self.pins = []
     self.footprints = []
+    self.pinset = pinset()
 
   def add_tags(self, tags):
     """add keyword/tags for documentation"""
@@ -127,11 +182,11 @@ class component(object):
 
   def add_pins(self, pins):
     """add a set of pins"""
-    self.pins.extend(pins)
+    self.pinset.add(pins)
 
-  def add_footprint(self, footprint):
+  def add_footprint(self, fp):
     """add a footprint"""
-    self.footprints.append(footprint)
+    self.footprints.append(fp)
 
   def lib(self, fp=None):
     """return the kicad schematic symbol"""
