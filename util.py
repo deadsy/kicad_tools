@@ -8,24 +8,6 @@ Utility Functions
 
 import kicad
 
-
-#-----------------------------------------------------------------------------
-
-# map a user friendly string onto the kicad pin type
-pin_types = {
-  'in': 'I', # Input
-  'out': 'O', # Output
-  'inout': 'B', # Bidirectional
-  'tristate': 'T', # Tristate
-  'passive': 'P', # Passive
-  'open_collector': 'C', # Open Collector
-  'open_emitter': 'E', # Open Emitter
-  'nc': 'N', # Non-connected
-  'unspecified': 'U', # Unspecified
-  'power_in': 'W', # Power input
-  'power_out': 'w', # Power output
-}
-
 #-----------------------------------------------------------------------------
 
 def build_symbol(name, reference, pins, w):
@@ -72,6 +54,10 @@ class footprint(object):
     """return the pin numbers associated with a pin name"""
     return self.name2number[pin_name]
 
+  def get_pin_names(self):
+    """return the pin names in the footprint"""
+    return list(set(self.name2number.keys()))
+
   def set_pin_map(self, pin_map):
     """set the pin name to pin number mapping"""
     # each pin number must be unique
@@ -84,10 +70,25 @@ class footprint(object):
         all_numbers[number] = True
       self.name2number[name] = numbers
 
-
 #-----------------------------------------------------------------------------
 
+# map a user friendly string onto the kicad pin type
+pin_types = {
+  'in': 'I', # Input
+  'out': 'O', # Output
+  'inout': 'B', # Bidirectional
+  'tristate': 'T', # Tristate
+  'passive': 'P', # Passive
+  'open_collector': 'C', # Open Collector
+  'open_emitter': 'E', # Open Emitter
+  'nc': 'N', # Non-connected
+  'unspecified': 'U', # Unspecified
+  'power_in': 'W', # Power input
+  'power_out': 'w', # Power output
+}
+
 class pin(object):
+  """single component pin"""
 
   def __init__(self, name, pin_type, side=None, group=0, unit=0):
     assert pin_type in pin_types.keys(), 'bad pin type %s' % pin_type
@@ -168,7 +169,7 @@ class component(object):
     self.url = None
     self.tags = [name,]
     self.footprints = []
-    self.pinset = pinset()
+    self.name2pin = {}
 
   def add_tags(self, tags):
     """add keyword/tags for documentation"""
@@ -182,14 +183,30 @@ class component(object):
 
   def add_pins(self, pins):
     """add a set of pins"""
-    self.pinset.add(pins)
+    for p in pins:
+      assert self.name2pin.has_key(p.name) is False, 'duplicate pin name %s in component %s' % (p.name, self.name)
+      self.name2pin[p.name] = p
 
   def add_footprint(self, fp):
     """add a footprint"""
+    # check that all the names in the footprint map are in the component
+    for name in fp.get_pin_names():
+      assert self.name2pin.has_key(name) is True, 'footprint pin name %s (%s) not found in component %s' % (name, fp.name, self.name)
     self.footprints.append(fp)
 
-  def lib(self, fp=None):
+  def footprint_lookup(self, fp_name):
+    """lookup a footprint by name"""
+    assert len(self.footprints) != 0, 'no footprints defined'
+    if fp_name is None:
+      return self.footprints[0]
+    for fp in self.footprints:
+      if fp.name == fp_name:
+        return fp
+    assert False, 'no footprint "%s" found for %s' % (fp_name, self.name)
+
+  def lib_str(self, fp_name=None):
     """return the kicad schematic symbol"""
+    fp = self.footprint_lookup(fp_name)
     return ''
 
   def dcm_str(self):
