@@ -113,6 +113,13 @@ class pin(object):
       assert side in ('T', 'L', 'R', 'B'), 'bad symbol side %s' % side
     self.side = side
 
+def rename_pin(pins, old_name, new_name):
+  """rename a pin in the pin list"""
+  for p in pins:
+    if p.name == old_name:
+      p.name = new_name
+      return
+
 #-----------------------------------------------------------------------------
 
 pin_length = 200 # length of schematic pin (mils)
