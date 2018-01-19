@@ -10,9 +10,9 @@ import util
 
 #-----------------------------------------------------------------------------
 
-tlc5940 = util.component('TLC5940', '16-Channel LED Driver')
-tlc5940.add_tags(('LED', 'PWM'))
-tlc5940.set_url('http://www.ti.com/product/TLC5940')
+dev = util.component('TLC5940', '16-Channel LED Driver')
+dev.add_tags(('LED', 'PWM'))
+dev.set_url('http://www.ti.com/product/TLC5940')
 
 pins = (
   util.pin('VCC', 'power_in'),
@@ -45,7 +45,7 @@ pins = (
   util.pin('OUT15', 'out'),
 )
 
-tlc5940.add_pins(pins)
+dev.add_pins(pins)
 
 #-----------------------------------------------------------------------------
 # PDIP-28 footprint
@@ -83,8 +83,6 @@ pin_map = {
   'OUT15': (15,),
 }
 
-fp.set_pin_map(pin_map)
-tlc5940.add_footprint(fp)
 
 #-----------------------------------------------------------------------------
 # VQFN-32 footprint
@@ -123,7 +121,7 @@ pin_map = {
 }
 
 fp.set_pin_map(pin_map)
-tlc5940.add_footprint(fp)
+dev.add_footprint(fp)
 
 #-----------------------------------------------------------------------------
 # HTSSOP-28 footprint
@@ -162,11 +160,11 @@ pin_map = {
 }
 
 fp.set_pin_map(pin_map)
-tlc5940.add_footprint(fp)
+dev.add_footprint(fp)
 
 #-----------------------------------------------------------------------------
 
-print tlc5940.dcm_str()
-print tlc5940.lib_str('HTSSOP-28')
+print dev.dcm_str()
+print dev.lib_str('HTSSOP-28')
 
 #-----------------------------------------------------------------------------

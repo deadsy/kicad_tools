@@ -123,12 +123,12 @@ pin_group_space = 100 # space btween pin groups (mils)
 class pinset(object):
   """combined component/footprint pin set"""
 
-  def __init__(self, component, footprint):
+  def __init__(self, c, fp):
     # do a join between the component pin names and the footprint pin numbers
     self.pins = []
-    for pin_name, pin_numbers in footprint.name2number.iteritems():
+    for pin_name, pin_numbers in fp.name2number.iteritems():
       for pin_number in pin_numbers:
-        self.pins.append((pin_number, component.name2pin[pin_name]))
+        self.pins.append((pin_number, c.name2pin[pin_name]))
 
   def num_pins(self, side):
     """return the number of pins on a side"""
@@ -138,14 +138,18 @@ class pinset(object):
     """return the pins on a side sorted by the group number"""
     pins = [(n, p) for (n, p) in self.pins if p.side == side]
     # sort by group
-    pins.sort(key = lambda (n, p) : p.group)
+    pins.sort(key=lambda (n, p): p.group)
+
+    for (n, p) in pins:
+      print n, p.group, p.side
+
     return pins
 
   def num_groups(self, side):
     """return the number of pin groups on a side"""
     groups = {}
-    for (_ , p) in self.pins:
-      if p.side == side:      
+    for (_, p) in self.pins:
+      if p.side == side:
         groups[p.group] = True
     return len(groups.keys())
 
@@ -165,6 +169,7 @@ class pinset(object):
 #-----------------------------------------------------------------------------
 
 class component(object):
+  """an electronic component/module"""
 
   def __init__(self, name, descr):
     self.name = name
