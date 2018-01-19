@@ -8,12 +8,12 @@ import kicad
 
 #-----------------------------------------------------------------------------
 
-import tlc5940
-import _7404
+import components.tlc5940
+import components._7404
 
 components = (
-  tlc5940.dev,
-  _7404.dev,
+  components.tlc5940.dev,
+  components._7404.dev,
 )
 
 #-----------------------------------------------------------------------------
