@@ -10,7 +10,7 @@ import util
 
 #-----------------------------------------------------------------------------
 
-dev = util.component('STM32F407xx', '32-Bit Cortex M4 Microcontroller')
+dev = util.component('STM32F407xx', 'U', '32-Bit Cortex M4 Microcontroller')
 dev.add_tags(('ST', 'STM32'))
 dev.set_url('www.st.com/resource/en/datasheet/stm32f405og.pdf')
 
@@ -48,8 +48,8 @@ other_pins = (
   util.pin('BOOT0', 'in'),
   util.pin('PDR_ON', 'in'),
 )
-
 pins.extend(other_pins)
+
 dev.add_pins(pins)
 
 #-----------------------------------------------------------------------------

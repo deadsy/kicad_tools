@@ -500,21 +500,21 @@ class lib_pin(object):
 
   def set_type(self, t):
     """set the pin type"""
-    t_vals = (
-      'I', # Input
-      'O', # Output
-      'B', # Bidirectional
-      'T', # Tristate
-      'P', # Passive
-      'C', # Open Collector
-      'E', # Open Emitter
-      'N', # Non-connected
-      'U', # Unspecified
-      'W', # Power input
-      'w', # Power output
-      )
-    assert t in t_vals, 'bad pin type %s' % t
-    self.type = t
+    # map a user friendly string onto the kicad pin type
+    pin_types = {
+      'in': 'I', # Input
+      'out': 'O', # Output
+      'inout': 'B', # Bidirectional
+      'tristate': 'T', # Tristate
+      'passive': 'P', # Passive
+      'open_collector': 'C', # Open Collector
+      'open_emitter': 'E', # Open Emitter
+      'nc': 'N', # Non-connected
+      'unspecified': 'U', # Unspecified
+      'power_in': 'W', # Power input
+      'power_out': 'w', # Power output
+    }
+    self.type = pin_types[t]
     if self.type == 'N':
       self.set_visible(False)
       self.set_shape('')
@@ -815,8 +815,8 @@ class lib_file(object):
     self.name = name
     self.components = []
 
-  def add_component(self, c):
-    self.components.append(c)
+  def add_components(self, c):
+    self.components.extend(c)
 
   def emit_head(self):
     s = []
@@ -832,7 +832,7 @@ class lib_file(object):
   def __str__(self):
     s = []
     s.append(self.emit_head())
-    s.extend([str(c) for c in self.components])
+    s.extend([c.lib_str() for c in self.components])
     s.append(self.emit_tail())
     return '\n'.join(s)
 
@@ -872,8 +872,8 @@ class dcm_file(object):
     self.name = name
     self.components = []
 
-  def add_component(self, c):
-    self.components.append(c)
+  def add_components(self, c):
+    self.components.extend(c)
 
   def emit_head(self):
     s = []
@@ -888,7 +888,7 @@ class dcm_file(object):
   def __str__(self):
     s = []
     s.append(self.emit_head())
-    s.extend([str(x) for x in self.components])
+    s.extend([x.dcm_str() for x in self.components])
     s.append(self.emit_tail())
     return '\n'.join(s)
 

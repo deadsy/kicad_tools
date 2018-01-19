@@ -46,8 +46,9 @@ def build_symbol(name, reference, pins, w):
 
 class footprint(object):
 
-  def __init__(self, name):
+  def __init__(self, name, lib):
     self.name = name
+    self.lib = lib
     self.name2number = {}
 
   def get_pin_numbers(self, pin_name):
@@ -72,26 +73,10 @@ class footprint(object):
 
 #-----------------------------------------------------------------------------
 
-# map a user friendly string onto the kicad pin type
-pin_types = {
-  'in': 'I', # Input
-  'out': 'O', # Output
-  'inout': 'B', # Bidirectional
-  'tristate': 'T', # Tristate
-  'passive': 'P', # Passive
-  'open_collector': 'C', # Open Collector
-  'open_emitter': 'E', # Open Emitter
-  'nc': 'N', # Non-connected
-  'unspecified': 'U', # Unspecified
-  'power_in': 'W', # Power input
-  'power_out': 'w', # Power output
-}
-
 class pin(object):
   """single component pin"""
 
   def __init__(self, name, pin_type, side=None, group=0, unit=0):
-    assert pin_type in pin_types.keys(), 'bad pin type %s' % pin_type
     self.name = name
     self.pin_type = pin_type
     self.group = group # pin grouping on schematic symbol
@@ -123,9 +108,10 @@ def rename_pin(pins, old_name, new_name):
 #-----------------------------------------------------------------------------
 
 pin_length = 200 # length of schematic pin (mils)
-pin_corner_space = 50 # space on corner of the symbols (mils)
+pin_corner_space = 100 # space on corner of the symbols (mils)
 pin_delta_space = 100 # pin to pin spacing (mils)
 pin_group_space = 100 # space btween pin groups (mils)
+pin_text_size = 50 # size of pin text
 
 class pinset(object):
   """combined component/footprint pin set"""
@@ -146,11 +132,21 @@ class pinset(object):
     pins = [(n, p) for (n, p) in self.pins if p.side == side]
     # sort by group
     pins.sort(key=lambda (n, p): p.group)
-
-    for (n, p) in pins:
-      print n, p.group, p.side
-
     return pins
+
+  def name_size(self, side):
+    """return the maximum size of the pin name text on this side"""
+    x = 0
+    for (_, p) in self.pins:
+      if p.side == side:
+        x = max(x, (len(p.name) + 2) * pin_text_size)
+    return x
+
+  def pin_size(self, side):
+    """return a side length large enough for the pins on this side"""
+    l = (self.num_pins(side) - 1) * pin_delta_space
+    l += (self.num_groups(side) - 1) * pin_group_space
+    return l
 
   def num_groups(self, side):
     """return the number of pin groups on a side"""
@@ -160,17 +156,25 @@ class pinset(object):
         groups[p.group] = True
     return len(groups.keys())
 
-  def len_side(self, side):
-    """return a side length large enough for the pins on this side"""
-    l = 2 * pin_corner_space
-    l += (self.num_pins(side) - 1) * pin_delta_space
-    l += (self.num_groups(side) - 1) * pin_group_space
-    return l
-
   def rect_size(self):
     """return the size of a rectangular symbol large enough for all the pins"""
-    w = max(self.len_side('T'), self.len_side('B'))
-    h = max(self.len_side('L'), self.len_side('R'))
+    # consider the number of pins
+    wp = max(self.pin_size('T'), self.pin_size('B'))
+    hp = max(self.pin_size('L'), self.pin_size('R'))
+    # extra space for the corners
+    wp += (2 * pin_corner_space)
+    hp += (2 * pin_corner_space)
+    # consider the pin names
+    wn = self.name_size('L') + self.name_size('R')
+    hn = self.name_size('T') + self.name_size('B')
+    # extra space for the middle
+    wn += 2 * pin_text_size
+    hn += 2 * pin_text_size
+    w = max(wp, wn)
+    h = max(hp, hn)
+    # round up to 200 mil increments
+    w = w + (200 - (w % 200))
+    h = h + (200 - (h % 200))
     return (w, h)
 
 #-----------------------------------------------------------------------------
@@ -178,8 +182,9 @@ class pinset(object):
 class component(object):
   """an electronic component/module"""
 
-  def __init__(self, name, descr):
+  def __init__(self, name, ref, descr):
     self.name = name
+    self.ref = ref
     self.descr = descr
     self.url = None
     self.tags = [name,]
@@ -223,12 +228,71 @@ class component(object):
     """return the kicad schematic symbol"""
     fp = self.footprint_lookup(fp_name)
     pins = pinset(self, fp)
-    print pins.rect_size()
-    pins.on_side('T')
-    pins.on_side('B')
-    pins.on_side('L')
-    pins.on_side('R')
-    return ''
+    # work out the symbol rectangle
+    (w, h) = pins.rect_size()
+    # create the component
+    lib = kicad.lib_component(self.name, self.ref)
+    # put the reference at the top right
+    lib.get_text(0).set_bl().ofs_xy(-w/2, h/2 + 50)
+    # put the name in the lower left
+    lib.get_text(1).set_tl().ofs_xy(-w/2, -h/2 - 50)
+    # add the footprint
+    lib.add_footprint(fp.lib, fp.name)
+    # create the unit
+    u = kicad.lib_unit()
+    u.add_shape(kicad.lib_rect(w, h))
+    # top pins
+    x0 = -pins.pin_size('T')/2
+    y0 = h/2 + pin_length
+    for i, v in enumerate(pins.on_side('T')):
+      (pin_number, pin) = v
+      x = x0 + (i * pin_delta_space) + (pin.group * pin_group_space)
+      (pin_number, pin) = v
+      p = kicad.lib_pin(pin_number, pin.name)
+      p.ofs_xy(x, y0)
+      p.set_orientation('D')
+      p.set_type(pin.pin_type)
+      p.set_length(pin_length)
+      u.add_pin(p)
+    # bottom pins
+    x0= -pins.pin_size('B')/2
+    y0 = -h/2 - pin_length
+    for i, v in enumerate(pins.on_side('B')):
+      (pin_number, pin) = v
+      p = kicad.lib_pin(pin_number, pin.name)
+      x = x0 + (i * pin_delta_space) + (pin.group * pin_group_space)
+      p.ofs_xy(x, y0)
+      p.set_orientation('U')
+      p.set_type(pin.pin_type)
+      p.set_length(pin_length)
+      u.add_pin(p)
+    # left pins
+    x0 = -w/2 - pin_length
+    y0 = h/2 - pin_corner_space
+    for i, v in enumerate(pins.on_side('L')):
+      (pin_number, pin) = v
+      p = kicad.lib_pin(pin_number, pin.name)
+      y = y0 - (i * pin_delta_space) - (pin.group * pin_group_space)
+      p.ofs_xy(x0, y)
+      p.set_orientation('R')
+      p.set_type(pin.pin_type)
+      p.set_length(pin_length)
+      u.add_pin(p)
+    # right pins
+    x0 = w/2 + pin_length
+    y0 = h/2 - pin_corner_space
+    for i, v in enumerate(pins.on_side('R')):
+      (pin_number, pin) = v
+      p = kicad.lib_pin(pin_number, pin.name)
+      y = y0 - (i * pin_delta_space) - (pin.group * pin_group_space)
+      p.ofs_xy(x0, y)
+      p.set_orientation('L')
+      p.set_type(pin.pin_type)
+      p.set_length(pin_length)
+      u.add_pin(p)
+    # add the unit
+    lib.add_unit(u)
+    return str(lib)
 
   def dcm_str(self):
     """return the kicad device documentation"""

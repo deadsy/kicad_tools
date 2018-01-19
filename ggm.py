@@ -5,23 +5,25 @@ GooGooMuck Library Files
 #-----------------------------------------------------------------------------
 
 import kicad
-import mb997
-import ili9341
-import com10982
+
+#-----------------------------------------------------------------------------
+
+import tlc5940
+import _7404
+
+components = (
+  tlc5940.dev,
+  _7404.dev,
+)
+
+#-----------------------------------------------------------------------------
 
 lib = kicad.lib_file('ggm')
-lib.add_component(mb997.lib)
-lib.add_component(ili9341.lib)
-lib.add_component(com10982.lib)
+lib.add_components(components)
 
 dcm = kicad.dcm_file('ggm')
-dcm.add_component(mb997.dcm)
-dcm.add_component(ili9341.dcm)
-dcm.add_component(com10982.dcm)
+dcm.add_components(components)
 
 mod = kicad.mod_files('ggm')
-mod.add_module(mb997.mod)
-mod.add_module(ili9341.mod)
-mod.add_module(com10982.mod)
 
 #-----------------------------------------------------------------------------

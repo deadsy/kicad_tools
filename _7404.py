@@ -10,7 +10,7 @@ import util
 
 #-----------------------------------------------------------------------------
 
-dev = util.component('74HC04', 'Hex Inverter')
+dev = util.component('74HC04', 'U', 'Hex Inverter')
 dev.add_tags(('Inverter',))
 dev.set_url('http://www.ti.com/lit/ds/symlink/sn74ahcu04-ep.pdf')
 
@@ -36,7 +36,7 @@ dev.add_pins(pins)
 #-----------------------------------------------------------------------------
 # DIP-14 footprint
 
-fp = util.footprint('DIP-14')
+fp = util.footprint('DIP14', 'ggm')
 
 pin_map = {
   '1A': (1,),
@@ -57,10 +57,5 @@ pin_map = {
 
 fp.set_pin_map(pin_map)
 dev.add_footprint(fp)
-
-#-----------------------------------------------------------------------------
-
-print dev.dcm_str()
-print dev.lib_str('DIP-14')
 
 #-----------------------------------------------------------------------------

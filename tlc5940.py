@@ -10,7 +10,7 @@ import util
 
 #-----------------------------------------------------------------------------
 
-dev = util.component('TLC5940', '16-Channel LED Driver')
+dev = util.component('TLC5940', 'U', '16-Channel LED Driver')
 dev.add_tags(('LED', 'PWM'))
 dev.set_url('http://www.ti.com/product/TLC5940')
 
@@ -25,8 +25,6 @@ pins = (
   util.pin('IREF', 'in'),
   util.pin('DCPRG', 'in'),
   util.pin('GSCLK', 'in'),
-  util.pin('SOUT', 'out'),
-  util.pin('XERR', 'out'),
   util.pin('OUT0', 'out'),
   util.pin('OUT1', 'out'),
   util.pin('OUT2', 'out'),
@@ -43,14 +41,16 @@ pins = (
   util.pin('OUT13', 'out'),
   util.pin('OUT14', 'out'),
   util.pin('OUT15', 'out'),
+  util.pin('SOUT', 'out', group=1),
+  util.pin('XERR', 'out', group=1),
 )
 
 dev.add_pins(pins)
 
 #-----------------------------------------------------------------------------
-# PDIP-28 footprint
+# DIP28 footprint
 
-fp = util.footprint('PDIP-28')
+fp = util.footprint('DIP28', 'ggm')
 
 pin_map = {
   'OUT1': (1,),
@@ -83,11 +83,13 @@ pin_map = {
   'OUT15': (15,),
 }
 
+fp.set_pin_map(pin_map)
+dev.add_footprint(fp)
 
 #-----------------------------------------------------------------------------
-# VQFN-32 footprint
+# VQFN32 footprint
 
-fp = util.footprint('VQFN-32')
+fp = util.footprint('VQFN32', 'ggm')
 
 pin_map = {
   'SCLK': (1,),
@@ -124,9 +126,9 @@ fp.set_pin_map(pin_map)
 dev.add_footprint(fp)
 
 #-----------------------------------------------------------------------------
-# HTSSOP-28 footprint
+# HTSSOP28 footprint
 
-fp = util.footprint('HTSSOP-28')
+fp = util.footprint('HTSSOP28', 'ggm')
 
 pin_map = {
   'GND': (1,),
@@ -161,10 +163,5 @@ pin_map = {
 
 fp.set_pin_map(pin_map)
 dev.add_footprint(fp)
-
-#-----------------------------------------------------------------------------
-
-print dev.dcm_str()
-print dev.lib_str('HTSSOP-28')
 
 #-----------------------------------------------------------------------------
