@@ -6,6 +6,7 @@ Utility Functions
 """
 #-----------------------------------------------------------------------------
 
+import string
 import kicad
 
 #-----------------------------------------------------------------------------
@@ -98,6 +99,33 @@ class pin(object):
       assert side in ('T', 'L', 'R', 'B'), 'bad symbol side %s' % side
     self.side = side
 
+  def sort_key(self):
+    """return a sort key, sort pins by group and then lexicographically by name"""
+    tmp = ''
+    state = None
+    x = [self.group,]
+    for c in self.name:
+      if c in string.digits:
+        if state == 'str':
+          x.append(tmp)
+          tmp = c
+        else:
+          tmp = tmp + c
+        state = 'int'
+      else:
+        if state == 'int':
+          x.append(int(tmp))
+          tmp = string.lower(c) + c
+        else:
+          tmp = tmp + string.lower(c) + c
+        state = 'str'
+    # append the last term
+    if state == 'int':
+      x.append(int(tmp))
+    else:
+      x.append(tmp)
+    return x
+
 def rename_pin(pins, old_name, new_name):
   """rename a pin in the pin list"""
   for p in pins:
@@ -131,7 +159,7 @@ class pinset(object):
     """return the pins on a side sorted by the group number"""
     pins = [(n, p) for (n, p) in self.pins if p.side == side]
     # sort by group
-    pins.sort(key=lambda (n, p): p.group)
+    pins.sort(key=lambda (n, p): p.sort_key())
     return pins
 
   def name_size(self, side):
@@ -255,7 +283,7 @@ class component(object):
       p.set_length(pin_length)
       u.add_pin(p)
     # bottom pins
-    x0= -pins.pin_size('B')/2
+    x0 = -pins.pin_size('B')/2
     y0 = -h/2 - pin_length
     for i, v in enumerate(pins.on_side('B')):
       (pin_number, pin) = v
@@ -301,7 +329,7 @@ class component(object):
     dcm.add_url(self.url)
     return str(dcm)
 
-  def mod_str(self, fp=None):
+  def mod_str(self, fp_name=None):
     """return the kicad pcb footprint"""
     return ''
 
