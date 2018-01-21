@@ -7,6 +7,7 @@ GooGooMuck Library Files
 import kicad
 
 #-----------------------------------------------------------------------------
+# components
 
 import components.tlc5940
 import components._7404
@@ -17,13 +18,25 @@ components = (
 )
 
 #-----------------------------------------------------------------------------
+# footprints
 
-lib = kicad.lib_file('ggm')
+import footprints.dip
+import footprints.qfn
+import footprints.soic
+
+#-----------------------------------------------------------------------------
+
+lib_name = 'ggm'
+
+lib = kicad.lib_file(lib_name)
 lib.add_components(components)
 
-dcm = kicad.dcm_file('ggm')
+dcm = kicad.dcm_file(lib_name)
 dcm.add_components(components)
 
-mod = kicad.mod_files('ggm')
+
+#mod = kicad.mod_files(lib_name)
+#dcm.add_components(components)
+
 
 #-----------------------------------------------------------------------------

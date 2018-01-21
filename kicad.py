@@ -832,7 +832,7 @@ class lib_file(object):
   def __str__(self):
     s = []
     s.append(self.emit_head())
-    s.extend([c.lib_str() for c in self.components])
+    s.extend([c.lib_str(self.name) for c in self.components])
     s.append(self.emit_tail())
     return '\n'.join(s)
 

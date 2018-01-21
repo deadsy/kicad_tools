@@ -6,51 +6,49 @@ TLC 5940
 """
 #-----------------------------------------------------------------------------
 
-import util
+from component import *
 
 #-----------------------------------------------------------------------------
 
-dev = util.component('TLC5940', 'U', '16-Channel LED Driver')
+dev = component('TLC5940', 'U', '16-Channel LED Driver')
 dev.add_tags(('LED', 'PWM'))
 dev.set_url('http://www.ti.com/product/TLC5940')
 
 pins = (
-  util.pin('VCC', 'power_in'),
-  util.pin('GND', 'power_in'),
-  util.pin('BLANK', 'in'),
-  util.pin('XLAT', 'in'),
-  util.pin('SCLK', 'in'),
-  util.pin('SIN', 'in'),
-  util.pin('VPRG', 'in'),
-  util.pin('IREF', 'in'),
-  util.pin('DCPRG', 'in'),
-  util.pin('GSCLK', 'in'),
-  util.pin('OUT0', 'out'),
-  util.pin('OUT1', 'out'),
-  util.pin('OUT2', 'out'),
-  util.pin('OUT3', 'out'),
-  util.pin('OUT4', 'out'),
-  util.pin('OUT5', 'out'),
-  util.pin('OUT6', 'out'),
-  util.pin('OUT7', 'out'),
-  util.pin('OUT8', 'out'),
-  util.pin('OUT9', 'out'),
-  util.pin('OUT10', 'out'),
-  util.pin('OUT11', 'out'),
-  util.pin('OUT12', 'out'),
-  util.pin('OUT13', 'out'),
-  util.pin('OUT14', 'out'),
-  util.pin('OUT15', 'out'),
-  util.pin('SOUT', 'out', group=1),
-  util.pin('XERR', 'out', group=1),
+  pin('VCC', 'power_in'),
+  pin('GND', 'power_in'),
+  pin('BLANK', 'in'),
+  pin('XLAT', 'in'),
+  pin('SCLK', 'in'),
+  pin('SIN', 'in'),
+  pin('VPRG', 'in'),
+  pin('IREF', 'in'),
+  pin('DCPRG', 'in'),
+  pin('GSCLK', 'in'),
+  pin('OUT0', 'out'),
+  pin('OUT1', 'out'),
+  pin('OUT2', 'out'),
+  pin('OUT3', 'out'),
+  pin('OUT4', 'out'),
+  pin('OUT5', 'out'),
+  pin('OUT6', 'out'),
+  pin('OUT7', 'out'),
+  pin('OUT8', 'out'),
+  pin('OUT9', 'out'),
+  pin('OUT10', 'out'),
+  pin('OUT11', 'out'),
+  pin('OUT12', 'out'),
+  pin('OUT13', 'out'),
+  pin('OUT14', 'out'),
+  pin('OUT15', 'out'),
+  pin('SOUT', 'out', group=1),
+  pin('XERR', 'out', group=1),
 )
 
 dev.add_pins(pins)
 
 #-----------------------------------------------------------------------------
 # DIP28 footprint
-
-fp = util.footprint('DIP28', 'ggm')
 
 pin_map = {
   'OUT1': (1,),
@@ -83,13 +81,10 @@ pin_map = {
   'OUT15': (15,),
 }
 
-fp.set_pin_map(pin_map)
-dev.add_footprint(fp)
+dev.add_footprint('DIP28', pin_map)
 
 #-----------------------------------------------------------------------------
 # VQFN32 footprint
-
-fp = util.footprint('VQFN32', 'ggm')
 
 pin_map = {
   'SCLK': (1,),
@@ -122,13 +117,10 @@ pin_map = {
   'XLAT': (32,),
 }
 
-fp.set_pin_map(pin_map)
-dev.add_footprint(fp)
+dev.add_footprint('VQFN32', pin_map)
 
 #-----------------------------------------------------------------------------
 # HTSSOP28 footprint
-
-fp = util.footprint('HTSSOP28', 'ggm')
 
 pin_map = {
   'GND': (1,),
@@ -161,7 +153,6 @@ pin_map = {
   'OUT8': (15,),
 }
 
-fp.set_pin_map(pin_map)
-dev.add_footprint(fp)
+dev.add_footprint('HTSSOP28', pin_map)
 
 #-----------------------------------------------------------------------------

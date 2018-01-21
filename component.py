@@ -1,76 +1,14 @@
 #-----------------------------------------------------------------------------
 """
 
-Utility Functions
+Component Functions
 
 """
 #-----------------------------------------------------------------------------
 
 import string
+import footprint
 import kicad
-
-#-----------------------------------------------------------------------------
-
-def build_symbol(name, reference, pins, w):
-  """return a component symbol - single unit"""
-  # work out the rectangle dimensions
-  p_len = 200
-  p_delta = 100
-  r_extra = 100
-  npins = (len(pins) & ~1) + 1
-  h = ((npins - 1) * p_delta) + (2 * r_extra)
-  # create the component
-  lib = kicad.lib_component(name, reference)
-  # put the reference at the top right
-  lib.get_text(0).set_bl().ofs_xy(-w/2, h/2 + 50)
-  # put the name in the lower left
-  lib.get_text(1).set_tl().ofs_xy(-w/2, -h/2 - 50)
-  # create the unit
-  u = kicad.lib_unit()
-  u.add_shape(kicad.lib_rect(w, h))
-  # add the pins
-  for i, v in enumerate(pins):
-    (pin_number, pin_name, pin_type) = v
-    p = kicad.lib_pin(pin_number, pin_name)
-    x = w/2 + p_len
-    y = h/2 - r_extra - (i * p_delta)
-    p.ofs_xy(x, y)
-    p.set_orientation('L')
-    p.set_type(pin_type)
-    p.set_length(p_len)
-    u.add_pin(p)
-  # add the unit
-  lib.add_unit(u)
-  return lib
-
-#-----------------------------------------------------------------------------
-
-class footprint(object):
-
-  def __init__(self, name, lib):
-    self.name = name
-    self.lib = lib
-    self.name2number = {}
-
-  def get_pin_numbers(self, pin_name):
-    """return the pin numbers associated with a pin name"""
-    return self.name2number[pin_name]
-
-  def get_pin_names(self):
-    """return the pin names in the footprint"""
-    return list(set(self.name2number.keys()))
-
-  def set_pin_map(self, pin_map):
-    """set the pin name to pin number mapping"""
-    # each pin number must be unique
-    all_numbers = {}
-    for name, numbers in pin_map.iteritems():
-      numbers = [str(x) for x in numbers]
-      # check for duplicates
-      for number in numbers:
-        assert all_numbers.has_key(number) is False, 'duplicate pin number %s' % number
-        all_numbers[number] = True
-      self.name2number[name] = numbers
 
 #-----------------------------------------------------------------------------
 
@@ -144,10 +82,10 @@ pin_text_size = 50 # size of pin text
 class pinset(object):
   """combined component/footprint pin set"""
 
-  def __init__(self, c, fp):
+  def __init__(self, c, fp_map):
     # do a join between the component pin names and the footprint pin numbers
     self.pins = []
-    for pin_name, pin_numbers in fp.name2number.iteritems():
+    for pin_name, pin_numbers in fp_map.name2number.iteritems():
       for pin_number in pin_numbers:
         self.pins.append((pin_number, c.name2pin[pin_name]))
 
@@ -207,8 +145,33 @@ class pinset(object):
 
 #-----------------------------------------------------------------------------
 
+class footprint_map(object):
+
+  def __init__(self, pin_map):
+    """setup a pin name to pin number mapping for a footprint"""
+    # each pin number must be unique
+    self.name2number = {}
+    all_numbers = {}
+    for name, numbers in pin_map.iteritems():
+      numbers = [str(x) for x in numbers]
+      # check for duplicates
+      for number in numbers:
+        assert all_numbers.has_key(number) is False, 'duplicate pin number %s' % number
+        all_numbers[number] = True
+      self.name2number[name] = numbers
+
+  def get_pin_numbers(self, pin_name):
+    """return the pin numbers associated with a pin name"""
+    return self.name2number[pin_name]
+
+  def get_pin_names(self):
+    """return the pin names in the footprint"""
+    return list(set(self.name2number.keys()))
+
+#-----------------------------------------------------------------------------
+
 class component(object):
-  """an electronic component/module"""
+  """an electronic device/module"""
 
   def __init__(self, name, ref, descr):
     self.name = name
@@ -235,37 +198,23 @@ class component(object):
       assert self.name2pin.has_key(p.name) is False, 'duplicate pin name %s in component %s' % (p.name, self.name)
       self.name2pin[p.name] = p
 
-  def add_footprint(self, fp):
+  def add_footprint(self, fp_name, pin_map):
     """add a footprint"""
-    # check that all the names in the footprint map are in the component
-    for name in fp.get_pin_names():
-      assert self.name2pin.has_key(name) is True, 'footprint pin name %s (%s) not found in component %s' % (name, fp.name, self.name)
-    self.footprints.append(fp)
+    self.footprints.append((fp_name, pin_map))
 
-  def footprint_lookup(self, fp_name):
-    """lookup a footprint by name"""
-    assert len(self.footprints) != 0, 'no footprints defined'
-    if fp_name is None:
-      return self.footprints[0]
-    for fp in self.footprints:
-      if fp.name == fp_name:
-        return fp
-    assert False, 'no footprint "%s" found for %s' % (fp_name, self.name)
-
-  def lib_str(self, fp_name=None):
+  def component_str(self, fp_name, fp_lib, pins):
     """return the kicad schematic symbol"""
-    fp = self.footprint_lookup(fp_name)
-    pins = pinset(self, fp)
     # work out the symbol rectangle
     (w, h) = pins.rect_size()
     # create the component
-    lib = kicad.lib_component(self.name, self.ref)
+    c_name = ('%s_%s' % (self.name, fp_name), self.name)[fp_name == self.name]
+    lib = kicad.lib_component(c_name, self.ref)
     # put the reference at the top right
     lib.get_text(0).set_bl().ofs_xy(-w/2, h/2 + 50)
     # put the name in the lower left
     lib.get_text(1).set_tl().ofs_xy(-w/2, -h/2 - 50)
     # add the footprint
-    lib.add_footprint(fp.lib, fp.name)
+    lib.add_footprint(fp_lib, fp_name)
     # create the unit
     u = kicad.lib_unit()
     u.add_shape(kicad.lib_rect(w, h))
@@ -322,15 +271,44 @@ class component(object):
     lib.add_unit(u)
     return str(lib)
 
+  def lib_str(self, fp_lib):
+    """generate the schematic symbol for each footprint in this component"""
+    s = []
+    for (fp_name, pin_map) in self.footprints:
+      # check that all the names in the footprint map are in the component
+      for name in pin_map.iterkeys():
+        assert self.name2pin.has_key(name) is True, 'footprint pin name %s (%s) not found in component %s' % (name, fp.name, self.name)
+      fp_map = footprint_map(pin_map)
+      s.append(self.component_str(fp_name, fp_lib, pinset(self, fp_map)))
+    return '\n'.join(s)
+
   def dcm_str(self):
     """return the kicad device documentation"""
-    dcm = kicad.dcm_component(self.name, self.descr)
-    dcm.add_keywords(self.tags)
-    dcm.add_url(self.url)
-    return str(dcm)
+    s = []
+    for (fp_name, _) in self.footprints:
+      c_name = ('%s_%s' % (self.name, fp_name), self.name)[fp_name == self.name]
+      dcm = kicad.dcm_component(c_name, self.descr)
+      dcm.add_keywords(self.tags)
+      dcm.add_url(self.url)
+      s.append(str(dcm))
+    return '\n'.join(s)
 
-  def mod_str(self, fp_name=None):
-    """return the kicad pcb footprint"""
-    return ''
+#-----------------------------------------------------------------------------
+"""
 
+
+
+
+  def footprint_lookup(self, fp_name):
+
+    assert len(self.footprints) != 0, 'no footprints defined'
+    if fp_name is None:
+      return self.footprints[0]
+    for fp in self.footprints:
+      if fp.name == fp_name:
+        return fp
+    assert False, 'no footprint "%s" found for %s' % (fp_name, self.name)
+
+
+"""
 #-----------------------------------------------------------------------------

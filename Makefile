@@ -12,7 +12,7 @@ MOD = $(DST)/ggm.pretty
 all:
 	./py2lib -i ggm -t lib > $(LIB)
 	./py2lib -i ggm -t dcm > $(DCM)
-	./py2lib -i ggm -t mod
+#	./py2lib -i ggm -t mod
 	cp $(LIB) $(DST)
 	cp $(DCM) $(DST)
 	mkdir -p $(MOD)
