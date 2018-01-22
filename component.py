@@ -7,7 +7,6 @@ Component Functions
 #-----------------------------------------------------------------------------
 
 import string
-import footprint
 import kicad
 
 #-----------------------------------------------------------------------------
@@ -277,7 +276,7 @@ class component(object):
     for (fp_name, pin_map) in self.footprints:
       # check that all the names in the footprint map are in the component
       for name in pin_map.iterkeys():
-        assert self.name2pin.has_key(name) is True, 'footprint pin name %s (%s) not found in component %s' % (name, fp.name, self.name)
+        assert self.name2pin.has_key(name) is True, 'footprint pin name %s (%s) not found in component %s' % (name, fp_name, self.name)
       fp_map = footprint_map(pin_map)
       s.append(self.component_str(fp_name, fp_lib, pinset(self, fp_map)))
     return '\n'.join(s)
@@ -293,22 +292,4 @@ class component(object):
       s.append(str(dcm))
     return '\n'.join(s)
 
-#-----------------------------------------------------------------------------
-"""
-
-
-
-
-  def footprint_lookup(self, fp_name):
-
-    assert len(self.footprints) != 0, 'no footprints defined'
-    if fp_name is None:
-      return self.footprints[0]
-    for fp in self.footprints:
-      if fp.name == fp_name:
-        return fp
-    assert False, 'no footprint "%s" found for %s' % (fp_name, self.name)
-
-
-"""
 #-----------------------------------------------------------------------------

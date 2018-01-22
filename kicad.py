@@ -25,6 +25,9 @@ MM_PER_INCH = 25.4
 def mil2mm(mil):
   return MM_PER_INCH * (float(mil) / 1000.0)
 
+def mm2mil(mm):
+  return 1000.0 * float(mm) / MM_PER_INCH
+
 def tedit_secs():
   """return number of seconds since 1970/1/1"""
   return int(time.time())
@@ -223,12 +226,13 @@ class mod_pad(object):
   """footprint pad"""
 
   def __init__(self, name, pad_type, pad_shape, layers):
-    assert pad_type in pad_types, 'bad pad type %s' % ptype
-    assert pad_shape in pad_shapes, 'bad pad shape %s' % shape
+    assert pad_type in pad_types, 'bad pad type %s' % pad_type
+    assert pad_shape in pad_shapes, 'bad pad shape %s' % pad_shape
     self.name = (name, '""')[len(name) == 0]
     self.pad_type = pad_type # pad type
     self.pad_shape = pad_shape
     self.layers = mod_layers(layers)
+    self.rect_delta = None
     # TODO
     # drill oval
     # die_length
@@ -304,7 +308,7 @@ class mod_text(object):
   """footprint fp_text element"""
 
   def __init__(self, text, text_type, layer):
-    assert text_type in text_types, 'bad ttype %s' % ttype
+    assert text_type in text_types, 'bad text type %s' % text_type
     self.text = text
     self.text_type = text_type
     self.layer = mod_layer(layer)

@@ -71,7 +71,7 @@ def main():
   if _otype == 'lib':
     print module.lib
   if _otype == 'mod':
-    for m in module.mod.modules:
+    for m in module.mod:
       f = open('%s.kicad_mod' % m.name, 'w')
       f.write(str(m))
       f.close()

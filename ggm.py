@@ -5,6 +5,7 @@ GooGooMuck Library Files
 #-----------------------------------------------------------------------------
 
 import kicad
+import footprint
 
 #-----------------------------------------------------------------------------
 # components
@@ -34,9 +35,6 @@ lib.add_components(components)
 dcm = kicad.dcm_file(lib_name)
 dcm.add_components(components)
 
-
-#mod = kicad.mod_files(lib_name)
-#dcm.add_components(components)
-
+mod = footprint.db.values()
 
 #-----------------------------------------------------------------------------
