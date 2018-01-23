@@ -129,6 +129,17 @@ class mod_end(object):
 
 #-----------------------------------------------------------------------------
 
+class mod_angle(object):
+  """footprint angle element"""
+
+  def __init__(self, a):
+    self.a = float(a)
+
+  def __str__(self):
+    return '(angle %s)' % mm(self.a)
+
+#-----------------------------------------------------------------------------
+
 class mod_pts(object):
   """footprint pts (points) element"""
 
@@ -370,6 +381,29 @@ class mod_line(object):
 
 #-----------------------------------------------------------------------------
 
+class mod_arc(object):
+  """footprint fp_arc element"""
+
+  def __init__(self, start, end, angle, layer, width):
+    self.start = mod_start(start)
+    self.end = mod_end(end)
+    self.angle = mod_angle(angle)
+    self.layer = mod_layer(layer)
+    self.width = mod_width(width)
+
+  def __str__(self):
+    s = []
+    s.append('(fp_arc')
+    s.append(indent(str(self.start)))
+    s.append(indent(str(self.end)))
+    s.append(indent(str(self.angle)))
+    s.append(indent(str(self.layer)))
+    s.append(indent(str(self.width)))
+    s.append(')')
+    return '\n'.join(s)
+
+#-----------------------------------------------------------------------------
+
 class mod_module(object):
   """footprint module"""
 
@@ -420,7 +454,7 @@ class mod_module(object):
     poly = mod_poly(pts, layer, pwidth)
     self.add_shape(poly)
 
-  def add_rect(self, x, y, w, h, layer, pwidth):
+  def add_rect(self, x, y, w, h, layer, pwidth, render=('T', 'B', 'L', 'R')):
     """add a w x h rectangle with top left corner at x,y"""
     x = float(x)
     y = float(y)
@@ -430,10 +464,24 @@ class mod_module(object):
     tr = point(x + w, y)
     bl = point(x, y + h)
     br = point(x + w, y + h)
-    self.add_shape(mod_line(tl, tr, layer, pwidth))
-    self.add_shape(mod_line(tr, br, layer, pwidth))
-    self.add_shape(mod_line(br, bl, layer, pwidth))
-    self.add_shape(mod_line(bl, tl, layer, pwidth))
+    if 'T' in render:
+      self.add_shape(mod_line(tl, tr, layer, pwidth))
+    if 'R' in render:
+      self.add_shape(mod_line(tr, br, layer, pwidth))
+    if 'B' in render:
+      self.add_shape(mod_line(br, bl, layer, pwidth))
+    if 'L' in render:
+      self.add_shape(mod_line(bl, tl, layer, pwidth))
+    if 'd0' in render:
+      self.add_shape(mod_line(bl, tr, layer, pwidth))
+    if 'd1' in render:
+      self.add_shape(mod_line(tl, br, layer, pwidth))
+
+  def add_arc(self, x, y, radius, layer, pwidth):
+    start = point(x, y)
+    end = point(x + radius, y)
+    self.add_shape(mod_arc(start, end, 180, layer, pwidth))
+
 
   def tags_str(self):
     return '"%s"' % ' '.join([str(x) for x in self.tags])
