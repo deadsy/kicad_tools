@@ -25,7 +25,7 @@ class pin(object):
         side = 'R'
       elif pin_type == 'in':
         side = 'L'
-      elif self.name in ('VCC',):
+      elif self.name in ('VCC', 'VDD'):
         side = 'T'
       elif self.name in ('GND',):
         side = 'B'

@@ -12,10 +12,12 @@ import footprint
 
 import components.tlc5940
 import components._7404
+import components.bcmjtag
 
 components = (
   components.tlc5940.dev,
   components._7404.dev,
+  components.bcmjtag.dev,
 )
 
 #-----------------------------------------------------------------------------
