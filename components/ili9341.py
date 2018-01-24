@@ -19,11 +19,12 @@ from component import *
 
 name = 'ILI9341'
 descr = 'LCD Module 2.8 inch 240x320 SPI TFT with touch sensor and SD card'
+tags = ('LCD',)
 
 #-----------------------------------------------------------------------------
 
 dev = component(name, 'M', descr)
-dev.add_tags = (('LCD',))
+dev.add_tags = (tags)
 dev.set_url('https://www.amazon.com/gp/product/B017FZTIO6/ref=od_aui_detailpages00?ie=UTF8&psc=1')
 
 pins = (
@@ -82,16 +83,65 @@ dev.add_footprint('ILI9341', pin_map)
 
 class ili9341(object):
 
-  def __init__(self, name, descr):
+  def __init__(self):
+    global name
     self.name = name
-    self.descr = descr
+    self.w = 50.0 # board width
+    self.h = 86.0 # board height
+
+  def pad_xy(self, i):
+    """return the x, y position of pad i (0-based)"""
+    if i < 14:
+      group = 0
+      idx = i
+    else:
+      group = 1
+      idx = i - 14
+    pin_spacing = kicad.mil2mm(100)
+    x = group * kicad.mil2mm(500)
+    y = group * kicad.mil2mm(-3175)
+    x += idx * pin_spacing
+    return (x, y)
+
+  def courtyard(self, mod):
+    """add a courtyard"""
+    x = (kicad.mil2mm(1300) - self.w)/2.0
+    y = kicad.mil2mm(50) - self.h
+    mod.add_rect(x, y, self.w, self.h, 'F.CrtYd', 0.05)
+
+  def fab(self, mod):
+    """add a fab layer"""
+    pass
+
+  def silk(self, mod):
+    """add a silk layer"""
+    pass
+
+  def pads(self, mod):
+    """add the pads"""
+    pad_size = kicad.mil2mm(68)
+    hole_size = kicad.mil2mm(40)
+    for i in range(18):
+      pad_shape = ('circle', 'rect')[i == 0]
+      p = kicad.mod_pad('%d' % (i + 1), 'thru_hole', pad_shape, ('*.Cu', '*.Mask'))
+      p.set_size(pad_size, pad_size).set_drill(hole_size)
+      (x, y) = self.pad_xy(i)
+      p.set_xy(x, y)
+      mod.add_pad(p)
 
   def __str__(self):
     """return the kicad_mod code for this footprint"""
-    mod = kicad.mod_module(self.name, self.descr)
+    global descr, tags
+    mod = kicad.mod_module(self.name, descr)
+    mod.add_tags(tags)
+    self.pads(mod)
+    self.courtyard(mod)
+    self.fab(mod)
+    self.silk(mod)
+
     return str(mod)
 
-footprint.db.add(ili9341(name, descr))
+footprint.db.add(ili9341())
 
 #-----------------------------------------------------------------------------
 
