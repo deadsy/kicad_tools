@@ -12,13 +12,92 @@ There are 3 SPI connected subsystems in this module:
 #-----------------------------------------------------------------------------
 
 import kicad
+import footprint
+from component import *
 
 #-----------------------------------------------------------------------------
 
 name = 'ILI9341'
 descr = 'LCD Module 2.8 inch 240x320 SPI TFT with touch sensor and SD card'
-tags = (name, 'LCD',)
-url = 'https://www.amazon.com/gp/product/B017FZTIO6/ref=od_aui_detailpages00?ie=UTF8&psc=1'
+
+#-----------------------------------------------------------------------------
+
+dev = component(name, 'M', descr)
+dev.add_tags = (('LCD',))
+dev.set_url('https://www.amazon.com/gp/product/B017FZTIO6/ref=od_aui_detailpages00?ie=UTF8&psc=1')
+
+pins = (
+  # power
+  pin('VCC', 'power_in'),
+  pin('GND', 'power_in'),
+  # lcd
+  pin('LCD_CS', 'in'),
+  pin('LCD_RESET', 'in'),
+  pin('LCD_DC', 'in'),
+  pin('LCD_SDI', 'in'),
+  pin('LCD_SCK', 'in'),
+  pin('LCD_LED', 'in'),
+  pin('LCD_SDO', 'out'),
+  # touch screen
+  pin('TS_CLK', 'in', group=1),
+  pin('TS_CS', 'in', group=1),
+  pin('TS_DI', 'in', group=1),
+  pin('TS_DO', 'out', group=1),
+  pin('TS_IRQ', 'out', group=1),
+  # SD card
+  pin('SD_CS', 'in', group=2),
+  pin('SD_MOSI', 'in', group=2),
+  pin('SD_MISO', 'out', group=2),
+  pin('SD_CLK', 'in', group=2),
+)
+
+dev.add_pins(pins)
+
+#-----------------------------------------------------------------------------
+
+pin_map = {
+  'VCC': (1,),
+  'GND': (2,),
+  'LCD_CS': (3,),
+  'LCD_RESET': (4,),
+  'LCD_DC': (5,),
+  'LCD_SDI': (6,),
+  'LCD_SCK': (7,),
+  'LCD_LED': (8,),
+  'LCD_SDO': (9,),
+  'TS_CLK': (10,),
+  'TS_CS': (11,),
+  'TS_DI': (12,),
+  'TS_DO': (13,),
+  'TS_IRQ': (14,),
+  'SD_CS': (15,),
+  'SD_MOSI': (16,),
+  'SD_MISO': (17,),
+  'SD_CLK': (18,),
+}
+
+dev.add_footprint('ILI9341', pin_map)
+
+#-----------------------------------------------------------------------------
+
+class ili9341(object):
+
+  def __init__(self, name, descr):
+    self.name = name
+    self.descr = descr
+
+  def __str__(self):
+    """return the kicad_mod code for this footprint"""
+    mod = kicad.mod_module(self.name, self.descr)
+    return str(mod)
+
+footprint.db.add(ili9341(name, descr))
+
+#-----------------------------------------------------------------------------
+
+
+"""
+
 
 # pin_number, pin_name, pin_type, pad_position
 pins = (
@@ -46,15 +125,9 @@ board_width = 50.0
 board_height = 86.0
 
 def pad_name(pin_number):
-  """return the pad name"""
   return '%d' % pin_number
 
-#-----------------------------------------------------------------------------
-# part documentation
 
-dcm = kicad.dcm_component(name, descr)
-dcm.add_keywords(tags)
-dcm.add_url(url)
 
 #-----------------------------------------------------------------------------
 # schematic symbol
@@ -66,7 +139,7 @@ rw = 600
 rh = ((len(pins) - 1) * p_delta) + (2 * r_extra)
 
 def set_pins(unit, pins, w, h):
-  """add the pins to the component unit"""
+
   i = 0
   for (pin_number, pin_name, pin_type, _) in pins:
     p = kicad.lib_pin(pad_name(pin_number), pin_name)
@@ -96,7 +169,7 @@ lib.ofs_xy(0, 50)
 # pcb footprint
 
 def pad_xy(pad_position):
-  """return the pad x,y position"""
+
   pin_spacing = kicad.mil2mm(100)
   (group, idx) = pad_position
   x = group * kicad.mil2mm(500)
@@ -116,7 +189,7 @@ def mod_add_pads(mod, pins):
     mod.add_pad(p)
 
 def mod_add_connector_outline(mod):
-  """add the connector outlines"""
+
   ch = kicad.mil2mm(100)
   dx = kicad.mil2mm(50)
   dy = kicad.mil2mm(50)
@@ -132,7 +205,7 @@ def mod_add_connector_outline(mod):
   mod.add_rect(cx, cy, kicad.mil2mm(4 * 100), ch, 'F.SilkS', 0.12)
 
 def mod_add_board_outline(mod):
-  """add a board outline"""
+
   bw = board_width
   bh = board_height
   bx = (kicad.mil2mm(1300) - bw)/2.0
@@ -186,4 +259,5 @@ def mod_init(mod):
 mod = kicad.mod_module(name, descr)
 mod_init(mod)
 
+"""
 #-----------------------------------------------------------------------------

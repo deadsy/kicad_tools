@@ -604,7 +604,9 @@ class lib_pin(object):
     s.append('%d' % self.part)
     s.append('%d' % self.dmg)
     s.append(self.type)
-    s.append('%s%s' % (self.visible, self.shape))
+    x = '%s%s' % (self.visible, self.shape)
+    if len(x):
+      s.append(x)
     return ' '.join(s)
 
 #-----------------------------------------------------------------------------
