@@ -25,9 +25,9 @@ dev.set_url(url)
 
 pins = []
 # add all the io pins
-for port in ('A','B','C','D','E',):
-  for i in range(16):
-    pins.append(pin('P%s%d' % (port, i), 'inout'))
+for (j, port) in enumerate(('A', 'B', 'C', 'D', 'E',)):
+  for k in range(16):
+    pins.append(pin('P%s%d' % (port, k), 'inout', side=('L', 'R')[j & 1 == 0], group=j + 1))
 
 # fixups
 append_pin_name(pins, 'PA0', 'SW_PUSH')
@@ -67,12 +67,12 @@ remove_pin(pins, 'PA12')
 other_pins = (
   pin('NRST', 'in'),
   pin('PH0/OSC_IN', 'inout'),
-  pin('PH1/OSC_PUT', 'inout'),
+  pin('PH1/OSC_OUT', 'inout'),
   pin('BOOT0', 'in'),
   pin('NC', 'nc'),
-  pin('VDD', 'power_in'),
-  pin('5V', 'power_in'),
-  pin('3V', 'power_in'),
+  pin('3V', 'power_in', group=0),
+  pin('5V', 'power_in', group=1),
+  pin('VDD', 'power_in', group=2),
   pin('GND', 'power_in'),
 )
 pins.extend(other_pins)
@@ -81,14 +81,97 @@ dev.add_pins(pins)
 
 #-----------------------------------------------------------------------------
 
+pin_map = {
+  '5V': ('B3', 'B4',),
+  'BOOT0': ('B21',),
+  'PH0/OSC_IN': ('B7',),
+  'PC12/I2S3_SD': ('B35',),
+  'PE3/MEMS_CS': ('B16',),
+  'PC14/osc_in': ('B9',),
+  'PB9/Audio_SDA': ('B20',),
+  'PD5/OTG_FS_OC': ('B29',),
+  'PA6/SPI1_MISO': ('A18',),
+  'PB10/CLK_IN': ('A34',),
+  'PA14/SWCLK': ('B39',),
+  'PA10/OTG_FS_ID': ('B41',),
+  'PA2': ('A14',),
+  'PA3': ('A13',),
+  'PA0/SW_PUSH': ('A12',),
+  'PD14/LED5': ('A46',),
+  'PA8': ('B43',),
+  'PD4/Audio_RST': ('B32',),
+  'PC11': ('B38',),
+  'PC13': ('B12',),
+  'VDD': ('A3', 'A4', 'B22',),
+  'PB5': ('B26',),
+  'PB4': ('B25',),
+  'PB7': ('B24',),
+  'PB1': ('A21',),
+  'PB0': ('A22',),
+  'PB2': ('A24',),
+  'PB8': ('B19',),
+  'PH1/OSC_OUT': ('B8',),
+  'NRST': ('A6',),
+  'PC8': ('B45',),
+  'PC9': ('B46',),
+  'PC2': ('A10',),
+  'PC1': ('A7',),
+  'PC6': ('B47',),
+  'PC15/osc_out': ('B10',),
+  'PC5': ('A19',),
+  'PD11': ('A43',),
+  'PD10': ('A42',),
+  'PA9/VBUS_FS': ('B44',),
+  'PB3/SWO': ('B28',),
+  'PC10/I2S3_SCK': ('B37',),
+  'PB6/Audio_SCL': ('B23',),
+  'PA4/I2S3_WS': ('A16',),
+  'PE0/MEMS_INT1': ('B17',),
+  'PD9': ('A41',),
+  'PD8': ('A40',),
+  'PD7': ('B27',),
+  'PD6': ('B30',),
+  'NC': ('A48',),
+  'PD3': ('B31',),
+  'PD2': ('B34',),
+  'PD1': ('B33',),
+  'PD0': ('B36',),
+  'PC3/PDM_OUT': ('A9',),
+  'PA1/system_reset': ('A11',),
+  'PE1/MEMS_INT2': ('B18',),
+  '3V': ('B5', 'B6',),
+  'PA7/SPI1_MOSI': ('A17',),
+  'PC0/OTG_FS_PSON': ('A8',),
+  'PE8': ('A26',),
+  'PE9': ('A27',),
+  'PE4': ('B13',),
+  'PE5': ('B14',),
+  'PE6': ('B11',),
+  'PE7': ('A25',),
+  'PE2': ('B15',),
+  'PD15/LED6': ('A47',),
+  'PC7/I2S3_MCK': ('B48',),
+  'PB11': ('A35',),
+  'PB13': ('A37',),
+  'PB12': ('A36',),
+  'PB15': ('A39',),
+  'PB14': ('A38',),
+  'PA5/SPI1_SCK': ('A15',),
+  'PC4': ('A20',),
+  'GND': ('A1', 'A2', 'A5', 'A23', 'A49', 'A50', 'B1', 'B2', 'B49', 'B50',),
+  'PA15': ('B40',),
+  'PD13/LED3': ('A45',),
+  'PD12/LED4': ('A44',),
+  'PA13/SWDIO': ('B42',),
+  'PE14': ('A32',),
+  'PE15': ('A33',),
+  'PE12': ('A30',),
+  'PE13': ('A31',),
+  'PE10': ('A28',),
+  'PE11': ('A29',),
+}
 
-
-
-
-
-
-
-
+dev.add_footprint('MB997', pin_map)
 
 #-----------------------------------------------------------------------------
 
@@ -97,258 +180,80 @@ class mb997(object):
   def __init__(self):
     global name
     self.name = name
+    self.w = 66.0 # board width
+    self.h = 97.0 # board height
+
+  def pad_xy(self, row, n):
+    pin_spacing = kicad.mil2mm(100)
+    row_spacing = kicad.mil2mm(2000)
+    x = row * row_spacing + (n & 1) * pin_spacing
+    y = (n >> 1) * pin_spacing
+    return (x, y)
+
+  def add_pads(self, mod):
+    """add the pads"""
+    pad_size = kicad.mil2mm(68)
+    hole_size = kicad.mil2mm(40)
+    for row in range(2):
+      for n in range(50):
+        pad_shape = ('circle', 'rect')[row == 0 and n == 0]
+        pad_name = '%s%d' % (('A', 'B')[row == 1], n + 1)
+        p = kicad.mod_pad(pad_name, 'thru_hole', pad_shape, ('*.Cu', '*.Mask'))
+        p.set_size(pad_size, pad_size).set_drill(hole_size)
+        (x, y) = self.pad_xy(row, n)
+        p.set_xy(x, y)
+        mod.add_pad(p)
+
+  def add_courtyard(self, mod):
+    """add a courtyard"""
+    x = (kicad.mil2mm(2100) - self.w)/2.0
+    y = kicad.mil2mm(-1350)
+    mod.add_rect(x, y, self.w, self.h, 'F.CrtYd', 0.05)
+
+  def add_fab(self, mod):
+    """add a fab layer"""
+    # board outline
+    x = (kicad.mil2mm(2100) - self.w)/2.0
+    y = kicad.mil2mm(-1350)
+    mod.add_rect(x, y, self.w, self.h, 'F.Fab', 0.1)
+    # fab name at top left
+    t = kicad.mod_text(name, 'value', 'F.Fab')
+    t.set_xy(kicad.mil2mm(-125), kicad.mil2mm(-1300))
+    mod.add_shape(t)
+    # fab reference at top left
+    t = kicad.mod_text('%R', 'user', 'F.Fab')
+    t.set_xy(kicad.mil2mm(-125), kicad.mil2mm(-1200))
+    mod.add_shape(t)
+
+  def add_silk(self, mod):
+    """add a silk layer"""
+    # add connector outlines
+    cw = kicad.mil2mm(200)
+    ch = kicad.mil2mm(25 * 100)
+    for cx, cy in (self.pad_xy(0, 0), self.pad_xy(1, 0)):
+      cx -= kicad.mil2mm(50)
+      cy -= kicad.mil2mm(50)
+      mod.add_rect(cx, cy, cw, ch, 'F.SilkS', 0.12)
+    # silk reference
+    t = kicad.mod_text('REF**', 'reference', 'F.SilkS')
+    t.set_xy(kicad.mil2mm(25), kicad.mil2mm(-100))
+    mod.add_shape(t)
+    # silk pin 1
+    t = kicad.mod_text('A1', 'user', 'F.SilkS')
+    t.set_xy(kicad.mil2mm(-100), 0)
+    mod.add_shape(t)
 
   def __str__(self):
     """return the kicad_mod code for this footprint"""
     global descr, tags
     mod = kicad.mod_module(self.name, descr)
     mod.add_tags(tags)
+    self.add_pads(mod)
+    self.add_courtyard(mod)
+    self.add_fab(mod)
+    self.add_silk(mod)
     return str(mod)
 
 footprint.db.add(mb997())
-
-#-----------------------------------------------------------------------------
-
-
-"""
-
-# (connector, number, name, type)
-pins = (
-  ( # port a
-    (1, 12, 'SW_PUSH/PA0', 'B'),
-    (1, 11, 'system_reset/PA1', 'B'),
-    (1, 14, 'PA2', 'B'),
-    (1, 13, 'PA3', 'B'),
-    (1, 16, 'I2S3_WS/PA4', 'B'),
-    (1, 15, 'SPI1_SCK/PA5', 'B'),
-    (1, 18, 'SPI1_MISO/PA6', 'B'),
-    (1, 17, 'SPI1_MOSI/PA7', 'B'),
-    (2, 43, 'PA8', 'B'),
-    (2, 44, 'VBUS_FS/PA9', 'B'),
-    (2, 41, 'OTG_FS_ID/PA10', 'B'),
-    # PA11 - not on connector
-    # PA12 - not on connector
-    (2, 42, 'SWDIO/PA13', 'B'),
-    (2, 39, 'SWCLK/PA14', 'B'),
-    (2, 40, 'PA15', 'B'),
-  ),
-  ( # port b
-    (1, 22, 'PB0', 'B'),
-    (1, 21, 'PB1', 'B'),
-    (1, 24, 'PB2', 'B'),
-    (2, 28, 'SWO/PB3', 'B'),
-    (2, 25, 'PB4', 'B'),
-    (2, 26, 'PB5', 'B'),
-    (2, 23, 'Audio_SCL/PB6', 'B'),
-    (2, 24, 'PB7', 'B'),
-    (2, 19, 'PB8', 'B'),
-    (2, 20, 'Audio_SDA/PB9', 'B'),
-    (1, 34, 'CLK_IN/PB10', 'B'),
-    (1, 35, 'PB11', 'B'),
-    (1, 36, 'PB12', 'B'),
-    (1, 37, 'PB13', 'B'),
-    (1, 38, 'PB14', 'B'),
-    (1, 39, 'PB15', 'B'),
-  ),
-  ( # port c
-    (1, 8, 'OTG_FS_PSON/PC0', 'B'),
-    (1, 7, 'PC1', 'B'),
-    (1, 10, 'PC2', 'B'),
-    (1, 9, 'PDM_OUT/PC3', 'B'),
-    (1, 20, 'PC4', 'B'),
-    (1, 19, 'PC5', 'B'),
-    (2, 47, 'PC6', 'B'),
-    (2, 48, 'I2S3_MCK/PC7', 'B'),
-    (2, 45, 'PC8', 'B'),
-    (2, 46, 'PC9', 'B'),
-    (2, 37, 'I2S3_SCK/PC10', 'B'),
-    (2, 38, 'PC11', 'B'),
-    (2, 35, 'I2S3_SD/PC12', 'B'),
-    (2, 12, 'PC13', 'B'),
-    (2, 9, 'osc_in/PC14', 'B'),
-    (2, 10, 'osc_out/PC15', 'B'),
-  ),
-  ( # port d
-    (2, 36, 'PD0', 'B'),
-    (2, 33, 'PD1', 'B'),
-    (2, 34, 'PD2', 'B'),
-    (2, 31, 'PD3', 'B'),
-    (2, 32, 'Audio_RST/PD4', 'B'),
-    (2, 29, 'OTG_FS_OC/PD5', 'B'),
-    (2, 30, 'PD6', 'B'),
-    (2, 27, 'PD7', 'B'),
-    (1, 40, 'PD8', 'B'),
-    (1, 41, 'PD9', 'B'),
-    (1, 42, 'PD10', 'B'),
-    (1, 43, 'PD11', 'B'),
-    (1, 44, 'LED4/PD12', 'B'),
-    (1, 45, 'LED3/PD13', 'B'),
-    (1, 46, 'LED5/PD14', 'B'),
-    (1, 47, 'LED6/PD15', 'B'),
-  ),
-  ( # port e
-    (2, 17, 'MEMS_INT1/PE0', 'B'),
-    (2, 18, 'MEMS_INT2/PE1', 'B'),
-    (2, 15, 'PE2', 'B'),
-    (2, 16, 'MEMS_CS/PE3', 'B'),
-    (2, 13, 'PE4', 'B'),
-    (2, 14, 'PE5', 'B'),
-    (2, 11, 'PE6', 'B'),
-    (1, 25, 'PE7', 'B'),
-    (1, 26, 'PE8', 'B'),
-    (1, 27, 'PE9', 'B'),
-    (1, 28, 'PE10', 'B'),
-    (1, 29, 'PE11', 'B'),
-    (1, 30, 'PE12', 'B'),
-    (1, 31, 'PE13', 'B'),
-    (1, 32, 'PE14', 'B'),
-    (1, 33, 'PE15', 'B'),
-  ),
-  ( # misc
-    (1, 6, 'NRST', 'I'),
-    (2, 7, 'ph0_osc_in/PH0', 'B'),
-    (2, 8, 'ph1_osc_out/PH1', 'B'),
-    (2, 21, 'BOOT0', 'I'),
-    (1, 48, 'NC', 'N'),
-  ),
-  ( # power
-    (1, 3, 'VDD', 'w'), # power output
-    (1, 4, 'VDD', 'W'),
-    (2, 22, 'VDD', 'W'),
-    (2, 3, '5V', 'w'), # power output
-    (2, 4, '5V', 'W'),
-    (2, 5, '3V', 'w'), # power output
-    (2, 6, '3V', 'W'),
-    (1, 1, 'GND', 'w'), # power output
-    (1, 2, 'GND', 'W'),
-    (1, 5, 'GND', 'W'),
-    (1, 23, 'GND', 'W'),
-    (1, 49, 'GND', 'W'),
-    (1, 50, 'GND', 'W'),
-    (2, 1, 'GND', 'W'),
-    (2, 2, 'GND', 'W'),
-    (2, 49, 'GND', 'W'),
-    (2, 50, 'GND', 'W'),
-  ),
-)
-
-def pad_name(prefix, pin_number):
-  return '%s%d' % (('A', 'B')[prefix == 2], pin_number)
-
-#-----------------------------------------------------------------------------
-# part documentation
-
-dcm = kicad.dcm_component(name, descr)
-dcm.add_keywords(tags)
-dcm.add_url(url)
-
-#-----------------------------------------------------------------------------
-# schematic symbol
-
-p_len = 200
-p_delta = 100
-r_extra = 100
-p_height = 17
-rw = 800
-rh = ((p_height - 1) * p_delta) + (2 * r_extra)
-
-def lib_add_pins(unit, pins, w, h):
-
-  i = 0
-  for (prefix, pin_number, pin_name, pin_type) in pins:
-    p = kicad.lib_pin(pad_name(prefix, pin_number), pin_name)
-    x = w/2 + p_len
-    y = h/2 - r_extra - (i * p_delta)
-    p.ofs_xy(x, y)
-    p.set_orientation('L')
-    p.set_type(pin_type)
-    p.set_length(p_len)
-    unit.add_pin(p)
-    i += 1
-
-def lib_add_units(lib, pins):
-
-  for unit_pins in pins:
-    u = kicad.lib_unit()
-    u.add_shape(kicad.lib_rect(rw, rh))
-    lib_add_pins(u, unit_pins, rw, rh)
-    lib.add_unit(u)
-
-lib = kicad.lib_component(name, 'M')
-lib.get_text(0).set_bl().ofs_xy(-rw/2, rh/2 + 50) # set the reference location
-lib.get_text(1).set_tl().ofs_xy(-rw/2, -rh/2 - 50) # set the name location
-lib.add_footprint('ggm', name)
-lib_add_units(lib, pins)
-
-#-----------------------------------------------------------------------------
-# pcb footprint
-
-def pad_xy(prefix, pin_number):
-
-  pin_spacing = kicad.mil2mm(100)
-  row_spacing = kicad.mil2mm(2000)
-  x = (prefix - 1) * row_spacing + ((pin_number - 1) & 1) * pin_spacing
-  y = ((pin_number - 1) >> 1) * pin_spacing
-  return (x, y)
-
-def mod_add_pads(mod, pins):
-  pad_size = kicad.mil2mm(68)
-  hole_size = kicad.mil2mm(40)
-  for unit_pins in pins:
-    for (prefix, pin_number, pin_name, pin_type) in unit_pins:
-      pad_shape = ('circle', 'rect')[pin_number == 1 and prefix == 1]
-      p = kicad.mod_pad(pad_name(prefix, pin_number), 'thru_hole', pad_shape, ('*.Cu', '*.Mask'))
-      p.set_size(pad_size, pad_size).set_drill(hole_size)
-      (x, y) = pad_xy(prefix, pin_number)
-      p.set_xy(x, y)
-      mod.add_pad(p)
-
-def mod_add_connector_outline(mod):
-
-  cw = kicad.mil2mm(200)
-  ch = kicad.mil2mm(25 * 100)
-  for cx, cy in (pad_xy(1, 1), pad_xy(2, 1)):
-    cx -= kicad.mil2mm(50)
-    cy -= kicad.mil2mm(50)
-    mod.add_rect(cx, cy, cw, ch, 'F.SilkS', 0.12)
-
-def mod_add_board_outline(mod):
-
-  bw = 66.0
-  bh = 97.0
-  bx = (kicad.mil2mm(2100) - bw)/2.0
-  by = kicad.mil2mm(-1350)
-  mod.add_rect(bx, by, bw, bh, 'F.CrtYd', 0.05)
-  mod.add_rect(bx, by, bw, bh, 'F.Fab', 0.1)
-
-def mod_add_text(mod):
-  # silk reference
-  t = kicad.mod_text('REF**', 'reference', 'F.SilkS')
-  t.set_xy(kicad.mil2mm(25), kicad.mil2mm(-100))
-  mod.add_shape(t)
-  # silk pin 1
-  t = kicad.mod_text('A1', 'user', 'F.SilkS')
-  t.set_xy(kicad.mil2mm(-100), 0)
-  mod.add_shape(t)
-  # fab name at top left
-  t = kicad.mod_text(name, 'value', 'F.Fab')
-  t.set_xy(kicad.mil2mm(-125), kicad.mil2mm(-1300))
-  mod.add_shape(t)
-  # fab reference at top left
-  t = kicad.mod_text('%R', 'user', 'F.Fab')
-  t.set_xy(kicad.mil2mm(-125), kicad.mil2mm(-1200))
-  mod.add_shape(t)
-
-def mod_init(mod):
-  mod.add_tags(tags)
-  mod_add_pads(mod, pins)
-  mod_add_connector_outline(mod)
-  mod_add_board_outline(mod)
-  mod_add_text(mod)
-
-mod = kicad.mod_module(name, descr)
-mod_init(mod)
-
-"""
 
 #-----------------------------------------------------------------------------

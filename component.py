@@ -25,7 +25,7 @@ class pin(object):
         side = 'R'
       elif pin_type == 'in':
         side = 'L'
-      elif self.name in ('VCC', 'VDD'):
+      elif self.name in ('VCC', 'VDD', '3V', '5V'):
         side = 'T'
       elif self.name in ('GND',):
         side = 'B'
@@ -292,7 +292,7 @@ class component(object):
     for (fp_name, pin_map) in self.footprints:
       # check that all the names in the footprint map are in the component
       for name in pin_map.iterkeys():
-        assert self.name2pin.has_key(name) is True, 'footprint pin name %s (%s) not found in component %s' % (name, fp_name, self.name)
+        assert self.name2pin.has_key(name) is True, 'footprint %s pin name %s not found in component %s' % (fp_name, name, self.name)
       fp_map = footprint_map(pin_map)
       s.append(self.component_str(fp_name, fp_lib, pinset(self, fp_map)))
     return '\n'.join(s)
