@@ -70,6 +70,22 @@ def rename_pin(pins, old_name, new_name):
       p.name = new_name
       return
 
+def append_pin_name(pins, name, more_names):
+  """append more names to a named pin"""
+  for p in pins:
+    if p.name == name:
+      p.name = '%s/%s' % (name, more_names)
+      return
+  assert False, 'pin name %s not found' % name
+
+def remove_pin(pins, name):
+  """remove a named pin from the list"""
+  for (i,p) in enumerate(pins):
+    if p.name == name:
+      del pins[i]
+      return
+  assert False, 'pin name %s not found' % name
+
 #-----------------------------------------------------------------------------
 
 pin_length = 200 # length of schematic pin (mils)

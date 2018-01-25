@@ -21,17 +21,17 @@ for port in ('A','B','C','D','E','F','G','H','I'):
     pins.append(util.pin('P%s%d' % (port, i), 'inout'))
 
 # fixups
-util.rename_pin(pins, 'PA0', 'PA0/WKUP')
-util.rename_pin(pins, 'PA13', 'PA13/JTMS-SWDIO')
-util.rename_pin(pins, 'PA14', 'PA14/JTCK/SWCLK')
-util.rename_pin(pins, 'PA15', 'PA15/JTDI')
-util.rename_pin(pins, 'PB2', 'PB2/BOOT1')
-util.rename_pin(pins, 'PB3', 'PB3/JTDO/TRACESWO')
-util.rename_pin(pins, 'PB4', 'PB4/NJTRST')
-util.rename_pin(pins, 'PC14', 'PC14/OSC32_IN')
-util.rename_pin(pins, 'PC15', 'PC15/OSC32_OUT')
-util.rename_pin(pins, 'PH0', 'PH0/OSC_IN')
-util.rename_pin(pins, 'PH1', 'PH1/OSC_OUT')
+util.append_pin_name(pins, 'PA0', 'WKUP')
+util.append_pin_name(pins, 'PA13', 'JTMS-SWDIO')
+util.append_pin_name(pins, 'PA14', 'JTCK/SWCLK')
+util.append_pin_name(pins, 'PA15', 'JTDI')
+util.append_pin_name(pins, 'PB2', 'BOOT1')
+util.append_pin_name(pins, 'PB3', 'JTDO/TRACESWO')
+util.append_pin_name(pins, 'PB4', 'NJTRST')
+util.append_pin_name(pins, 'PC14', 'OSC32_IN')
+util.append_pin_name(pins, 'PC15', 'OSC32_OUT')
+util.append_pin_name(pins, 'PH0', 'OSC_IN')
+util.append_pin_name(pins, 'PH1', 'OSC_OUT')
 
 other_pins = (
   util.pin('VBAT', 'power_in'),

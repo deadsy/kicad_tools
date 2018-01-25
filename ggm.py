@@ -14,12 +14,14 @@ import components.tlc5940
 import components._7404
 import components.bcmjtag
 import components.ili9341
+import components.mb997
 
 components = (
   components.tlc5940.dev,
   components._7404.dev,
   components.bcmjtag.dev,
   components.ili9341.dev,
+  components.mb997.dev,
 )
 
 #-----------------------------------------------------------------------------

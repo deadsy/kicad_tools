@@ -7,6 +7,8 @@ MB997 - STM32F4 Discovery Board
 #-----------------------------------------------------------------------------
 
 import kicad
+import footprint
+from component import *
 
 #-----------------------------------------------------------------------------
 
@@ -14,6 +16,101 @@ name = 'MB997'
 descr = 'STM32F4 Discovery Board'
 tags = (name, 'STM32', 'STM32F4', 'STM32F407', 'Discovery',)
 url = 'http://www.st.com/en/evaluation-tools/stm32f4discovery.html'
+
+#-----------------------------------------------------------------------------
+
+dev = component(name, 'M', descr)
+dev.add_tags = (tags)
+dev.set_url(url)
+
+pins = []
+# add all the io pins
+for port in ('A','B','C','D','E',):
+  for i in range(16):
+    pins.append(pin('P%s%d' % (port, i), 'inout'))
+
+# fixups
+append_pin_name(pins, 'PA0', 'SW_PUSH')
+append_pin_name(pins, 'PA1', 'system_reset')
+append_pin_name(pins, 'PA4', 'I2S3_WS')
+append_pin_name(pins, 'PA5', 'SPI1_SCK')
+append_pin_name(pins, 'PA6', 'SPI1_MISO')
+append_pin_name(pins, 'PA7', 'SPI1_MOSI')
+append_pin_name(pins, 'PA9', 'VBUS_FS')
+append_pin_name(pins, 'PA10', 'OTG_FS_ID')
+append_pin_name(pins, 'PA13', 'SWDIO')
+append_pin_name(pins, 'PA14', 'SWCLK')
+append_pin_name(pins, 'PB3', 'SWO')
+append_pin_name(pins, 'PB6', 'Audio_SCL')
+append_pin_name(pins, 'PB9', 'Audio_SDA')
+append_pin_name(pins, 'PB10', 'CLK_IN')
+append_pin_name(pins, 'PC0', 'OTG_FS_PSON')
+append_pin_name(pins, 'PC3', 'PDM_OUT')
+append_pin_name(pins, 'PC7', 'I2S3_MCK')
+append_pin_name(pins, 'PC10', 'I2S3_SCK')
+append_pin_name(pins, 'PC12', 'I2S3_SD')
+append_pin_name(pins, 'PC14', 'osc_in')
+append_pin_name(pins, 'PC15', 'osc_out')
+append_pin_name(pins, 'PD4', 'Audio_RST')
+append_pin_name(pins, 'PD5', 'OTG_FS_OC')
+append_pin_name(pins, 'PD12', 'LED4')
+append_pin_name(pins, 'PD13', 'LED3')
+append_pin_name(pins, 'PD14', 'LED5')
+append_pin_name(pins, 'PD15', 'LED6')
+append_pin_name(pins, 'PE0', 'MEMS_INT1')
+append_pin_name(pins, 'PE1', 'MEMS_INT2')
+append_pin_name(pins, 'PE3', 'MEMS_CS')
+
+remove_pin(pins, 'PA11')
+remove_pin(pins, 'PA12')
+
+other_pins = (
+  pin('NRST', 'in'),
+  pin('PH0/OSC_IN', 'inout'),
+  pin('PH1/OSC_PUT', 'inout'),
+  pin('BOOT0', 'in'),
+  pin('NC', 'nc'),
+  pin('VDD', 'power_in'),
+  pin('5V', 'power_in'),
+  pin('3V', 'power_in'),
+  pin('GND', 'power_in'),
+)
+pins.extend(other_pins)
+
+dev.add_pins(pins)
+
+#-----------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+#-----------------------------------------------------------------------------
+
+class mb997(object):
+
+  def __init__(self):
+    global name
+    self.name = name
+
+  def __str__(self):
+    """return the kicad_mod code for this footprint"""
+    global descr, tags
+    mod = kicad.mod_module(self.name, descr)
+    mod.add_tags(tags)
+    return str(mod)
+
+footprint.db.add(mb997())
+
+#-----------------------------------------------------------------------------
+
+
+"""
 
 # (connector, number, name, type)
 pins = (
@@ -136,7 +233,6 @@ pins = (
 )
 
 def pad_name(prefix, pin_number):
-  """return the pad name"""
   return '%s%d' % (('A', 'B')[prefix == 2], pin_number)
 
 #-----------------------------------------------------------------------------
@@ -157,7 +253,7 @@ rw = 800
 rh = ((p_height - 1) * p_delta) + (2 * r_extra)
 
 def lib_add_pins(unit, pins, w, h):
-  # add the pins to the unit"""
+
   i = 0
   for (prefix, pin_number, pin_name, pin_type) in pins:
     p = kicad.lib_pin(pad_name(prefix, pin_number), pin_name)
@@ -171,7 +267,7 @@ def lib_add_pins(unit, pins, w, h):
     i += 1
 
 def lib_add_units(lib, pins):
-  # add the units to the component"""
+
   for unit_pins in pins:
     u = kicad.lib_unit()
     u.add_shape(kicad.lib_rect(rw, rh))
@@ -188,7 +284,7 @@ lib_add_units(lib, pins)
 # pcb footprint
 
 def pad_xy(prefix, pin_number):
-  """return the pad x,y position"""
+
   pin_spacing = kicad.mil2mm(100)
   row_spacing = kicad.mil2mm(2000)
   x = (prefix - 1) * row_spacing + ((pin_number - 1) & 1) * pin_spacing
@@ -208,7 +304,7 @@ def mod_add_pads(mod, pins):
       mod.add_pad(p)
 
 def mod_add_connector_outline(mod):
-  """add the connector outlines"""
+
   cw = kicad.mil2mm(200)
   ch = kicad.mil2mm(25 * 100)
   for cx, cy in (pad_xy(1, 1), pad_xy(2, 1)):
@@ -217,7 +313,7 @@ def mod_add_connector_outline(mod):
     mod.add_rect(cx, cy, cw, ch, 'F.SilkS', 0.12)
 
 def mod_add_board_outline(mod):
-  """add a board outline"""
+
   bw = 66.0
   bh = 97.0
   bx = (kicad.mil2mm(2100) - bw)/2.0
@@ -252,5 +348,7 @@ def mod_init(mod):
 
 mod = kicad.mod_module(name, descr)
 mod_init(mod)
+
+"""
 
 #-----------------------------------------------------------------------------
