@@ -171,7 +171,7 @@ pin_map = {
   'PE11': ('A29',),
 }
 
-dev.add_footprint('MB997', pin_map)
+dev.add_footprint(name, pin_map)
 
 #-----------------------------------------------------------------------------
 

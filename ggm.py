@@ -15,6 +15,7 @@ import components._7404
 import components.bcmjtag
 import components.ili9341
 import components.mb997
+import components.rotenc
 
 components = (
   components.tlc5940.dev,
@@ -22,6 +23,7 @@ components = (
   components.bcmjtag.dev,
   components.ili9341.dev,
   components.mb997.dev,
+  components.rotenc.dev,
 )
 
 #-----------------------------------------------------------------------------

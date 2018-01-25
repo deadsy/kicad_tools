@@ -78,7 +78,7 @@ pin_map = {
   'SD_CLK': (18,),
 }
 
-dev.add_footprint('ILI9341', pin_map)
+dev.add_footprint(name, pin_map)
 
 #-----------------------------------------------------------------------------
 
