@@ -17,6 +17,7 @@ import components.bcmjtag
 import components.ili9341
 import components.mb997
 import components.rotenc
+import components.stm32f407xx
 
 #-----------------------------------------------------------------------------
 # footprints
