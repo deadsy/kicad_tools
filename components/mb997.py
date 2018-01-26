@@ -8,7 +8,7 @@ MB997 - STM32F4 Discovery Board
 
 import kicad
 import footprint
-from component import *
+import component
 
 #-----------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ url = 'http://www.st.com/en/evaluation-tools/stm32f4discovery.html'
 
 #-----------------------------------------------------------------------------
 
-dev = component(name, 'M', descr)
+dev = component.component(name, 'M', descr)
 dev.add_tags = (tags)
 dev.set_url(url)
 
@@ -27,57 +27,58 @@ pins = []
 # add all the io pins
 for (j, port) in enumerate(('A', 'B', 'C', 'D', 'E',)):
   for k in range(16):
-    pins.append(pin('P%s%d' % (port, k), 'inout', side=('L', 'R')[j & 1 == 0], group=j + 1))
+    pins.append(component.pin('P%s%d' % (port, k), 'inout', side=('L', 'R')[j & 1 == 0], group=j + 1))
 
 # fixups
-append_pin_name(pins, 'PA0', 'SW_PUSH')
-append_pin_name(pins, 'PA1', 'system_reset')
-append_pin_name(pins, 'PA4', 'I2S3_WS')
-append_pin_name(pins, 'PA5', 'SPI1_SCK')
-append_pin_name(pins, 'PA6', 'SPI1_MISO')
-append_pin_name(pins, 'PA7', 'SPI1_MOSI')
-append_pin_name(pins, 'PA9', 'VBUS_FS')
-append_pin_name(pins, 'PA10', 'OTG_FS_ID')
-append_pin_name(pins, 'PA13', 'SWDIO')
-append_pin_name(pins, 'PA14', 'SWCLK')
-append_pin_name(pins, 'PB3', 'SWO')
-append_pin_name(pins, 'PB6', 'Audio_SCL')
-append_pin_name(pins, 'PB9', 'Audio_SDA')
-append_pin_name(pins, 'PB10', 'CLK_IN')
-append_pin_name(pins, 'PC0', 'OTG_FS_PSON')
-append_pin_name(pins, 'PC3', 'PDM_OUT')
-append_pin_name(pins, 'PC7', 'I2S3_MCK')
-append_pin_name(pins, 'PC10', 'I2S3_SCK')
-append_pin_name(pins, 'PC12', 'I2S3_SD')
-append_pin_name(pins, 'PC14', 'osc_in')
-append_pin_name(pins, 'PC15', 'osc_out')
-append_pin_name(pins, 'PD4', 'Audio_RST')
-append_pin_name(pins, 'PD5', 'OTG_FS_OC')
-append_pin_name(pins, 'PD12', 'LED4')
-append_pin_name(pins, 'PD13', 'LED3')
-append_pin_name(pins, 'PD14', 'LED5')
-append_pin_name(pins, 'PD15', 'LED6')
-append_pin_name(pins, 'PE0', 'MEMS_INT1')
-append_pin_name(pins, 'PE1', 'MEMS_INT2')
-append_pin_name(pins, 'PE3', 'MEMS_CS')
+component.append_pin_name(pins, 'PA0', 'SW_PUSH')
+component.append_pin_name(pins, 'PA1', 'system_reset')
+component.append_pin_name(pins, 'PA4', 'I2S3_WS')
+component.append_pin_name(pins, 'PA5', 'SPI1_SCK')
+component.append_pin_name(pins, 'PA6', 'SPI1_MISO')
+component.append_pin_name(pins, 'PA7', 'SPI1_MOSI')
+component.append_pin_name(pins, 'PA9', 'VBUS_FS')
+component.append_pin_name(pins, 'PA10', 'OTG_FS_ID')
+component.append_pin_name(pins, 'PA13', 'SWDIO')
+component.append_pin_name(pins, 'PA14', 'SWCLK')
+component.append_pin_name(pins, 'PB3', 'SWO')
+component.append_pin_name(pins, 'PB6', 'Audio_SCL')
+component.append_pin_name(pins, 'PB9', 'Audio_SDA')
+component.append_pin_name(pins, 'PB10', 'CLK_IN')
+component.append_pin_name(pins, 'PC0', 'OTG_FS_PSON')
+component.append_pin_name(pins, 'PC3', 'PDM_OUT')
+component.append_pin_name(pins, 'PC7', 'I2S3_MCK')
+component.append_pin_name(pins, 'PC10', 'I2S3_SCK')
+component.append_pin_name(pins, 'PC12', 'I2S3_SD')
+component.append_pin_name(pins, 'PC14', 'osc_in')
+component.append_pin_name(pins, 'PC15', 'osc_out')
+component.append_pin_name(pins, 'PD4', 'Audio_RST')
+component.append_pin_name(pins, 'PD5', 'OTG_FS_OC')
+component.append_pin_name(pins, 'PD12', 'LED4')
+component.append_pin_name(pins, 'PD13', 'LED3')
+component.append_pin_name(pins, 'PD14', 'LED5')
+component.append_pin_name(pins, 'PD15', 'LED6')
+component.append_pin_name(pins, 'PE0', 'MEMS_INT1')
+component.append_pin_name(pins, 'PE1', 'MEMS_INT2')
+component.append_pin_name(pins, 'PE3', 'MEMS_CS')
 
-remove_pin(pins, 'PA11')
-remove_pin(pins, 'PA12')
+component.remove_pin(pins, 'PA11')
+component.remove_pin(pins, 'PA12')
 
 other_pins = (
-  pin('NRST', 'in'),
-  pin('PH0/OSC_IN', 'inout'),
-  pin('PH1/OSC_OUT', 'inout'),
-  pin('BOOT0', 'in'),
-  pin('NC', 'nc'),
-  pin('3V', 'power_in', group=0),
-  pin('5V', 'power_in', group=1),
-  pin('VDD', 'power_in', group=2),
-  pin('GND', 'power_in'),
+  component.pin('NRST', 'in'),
+  component.pin('PH0/OSC_IN', 'inout'),
+  component.pin('PH1/OSC_OUT', 'inout'),
+  component.pin('BOOT0', 'in'),
+  component.pin('NC', 'nc'),
+  component.pin('3V', 'power_in', group=0),
+  component.pin('5V', 'power_in', group=1),
+  component.pin('VDD', 'power_in', group=2),
+  component.pin('GND', 'power_in'),
 )
 pins.extend(other_pins)
 
 dev.add_pins(pins)
+component.db.add(dev)
 
 #-----------------------------------------------------------------------------
 

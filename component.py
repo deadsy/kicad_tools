@@ -309,3 +309,25 @@ class component(object):
     return '\n'.join(s)
 
 #-----------------------------------------------------------------------------
+
+class component_database(object):
+
+  def __init__(self):
+    self.components = {}
+
+  def lookup(self, name):
+    """lookup a component by name"""
+    assert self.components.has_key(name), 'component %s not found' % name
+    return self.components[name]
+
+  def values(self):
+    return self.components.values()
+
+  def add(self, c):
+    """add a component to the database"""
+    assert self.components.has_key(c.name) is False, 'component database already has %s' % c.name
+    self.components[c.name] = c
+
+db = component_database()
+
+#-----------------------------------------------------------------------------

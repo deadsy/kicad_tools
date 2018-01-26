@@ -6,7 +6,7 @@ Footprint Functions
 """
 #-----------------------------------------------------------------------------
 
-class footprint_database():
+class footprint_database(object):
 
   def __init__(self):
     self.footprints = {}

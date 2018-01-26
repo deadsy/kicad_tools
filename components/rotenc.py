@@ -9,7 +9,7 @@ https://cdn.sparkfun.com/datasheets/Components/Switches/EC12PLRGBSDVBF-D-25K-24-
 
 import kicad
 import footprint
-from component import *
+import component
 
 #-----------------------------------------------------------------------------
 
@@ -20,22 +20,23 @@ url = 'https://www.sparkfun.com/products/10982'
 
 #-----------------------------------------------------------------------------
 
-dev = component(name, 'S', descr)
+dev = component.component(name, 'S', descr)
 dev.add_tags = (tags)
 dev.set_url(url)
 
 pins = (
-  pin('PH_A', 'out'),
-  pin('PH_Com', 'out'),
-  pin('PH_B', 'out'),
-  pin('LED_R', 'in'),
-  pin('LED_G', 'in'),
-  pin('PB', 'out'),
-  pin('LED_B', 'in'),
-  pin('Com', 'power_in'),
+  component.pin('PH_A', 'out'),
+  component.pin('PH_Com', 'out'),
+  component.pin('PH_B', 'out'),
+  component.pin('LED_R', 'in'),
+  component.pin('LED_G', 'in'),
+  component.pin('PB', 'out'),
+  component.pin('LED_B', 'in'),
+  component.pin('Com', 'power_in'),
 )
 
 dev.add_pins(pins)
+component.db.add(dev)
 
 #-----------------------------------------------------------------------------
 

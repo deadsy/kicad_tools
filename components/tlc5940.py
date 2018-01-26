@@ -6,46 +6,47 @@ TLC 5940
 """
 #-----------------------------------------------------------------------------
 
-from component import *
+import component
 
 #-----------------------------------------------------------------------------
 
-dev = component('TLC5940', 'U', '16-Channel LED Driver')
+dev = component.component('TLC5940', 'U', '16-Channel LED Driver')
 dev.add_tags(('LED', 'PWM'))
 dev.set_url('http://www.ti.com/product/TLC5940')
 
 pins = (
-  pin('VCC', 'power_in'),
-  pin('GND', 'power_in'),
-  pin('BLANK', 'in'),
-  pin('XLAT', 'in'),
-  pin('SCLK', 'in'),
-  pin('SIN', 'in'),
-  pin('VPRG', 'in'),
-  pin('IREF', 'in'),
-  pin('DCPRG', 'in'),
-  pin('GSCLK', 'in'),
-  pin('OUT0', 'out'),
-  pin('OUT1', 'out'),
-  pin('OUT2', 'out'),
-  pin('OUT3', 'out'),
-  pin('OUT4', 'out'),
-  pin('OUT5', 'out'),
-  pin('OUT6', 'out'),
-  pin('OUT7', 'out'),
-  pin('OUT8', 'out'),
-  pin('OUT9', 'out'),
-  pin('OUT10', 'out'),
-  pin('OUT11', 'out'),
-  pin('OUT12', 'out'),
-  pin('OUT13', 'out'),
-  pin('OUT14', 'out'),
-  pin('OUT15', 'out'),
-  pin('SOUT', 'out', group=1),
-  pin('XERR', 'out', group=1),
+  component.pin('VCC', 'power_in'),
+  component.pin('GND', 'power_in'),
+  component.pin('BLANK', 'in'),
+  component.pin('XLAT', 'in'),
+  component.pin('SCLK', 'in'),
+  component.pin('SIN', 'in'),
+  component.pin('VPRG', 'in'),
+  component.pin('IREF', 'in'),
+  component.pin('DCPRG', 'in'),
+  component.pin('GSCLK', 'in'),
+  component.pin('OUT0', 'out'),
+  component.pin('OUT1', 'out'),
+  component.pin('OUT2', 'out'),
+  component.pin('OUT3', 'out'),
+  component.pin('OUT4', 'out'),
+  component.pin('OUT5', 'out'),
+  component.pin('OUT6', 'out'),
+  component.pin('OUT7', 'out'),
+  component.pin('OUT8', 'out'),
+  component.pin('OUT9', 'out'),
+  component.pin('OUT10', 'out'),
+  component.pin('OUT11', 'out'),
+  component.pin('OUT12', 'out'),
+  component.pin('OUT13', 'out'),
+  component.pin('OUT14', 'out'),
+  component.pin('OUT15', 'out'),
+  component.pin('SOUT', 'out', group=1),
+  component.pin('XERR', 'out', group=1),
 )
 
 dev.add_pins(pins)
+component.db.add(dev)
 
 #-----------------------------------------------------------------------------
 # DIP28 footprint

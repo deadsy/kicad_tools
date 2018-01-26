@@ -13,7 +13,7 @@ There are 3 SPI connected subsystems in this module:
 
 import kicad
 import footprint
-from component import *
+import component
 
 #-----------------------------------------------------------------------------
 
@@ -24,36 +24,37 @@ url = 'https://www.amazon.com/gp/product/B017FZTIO6/ref=od_aui_detailpages00?ie=
 
 #-----------------------------------------------------------------------------
 
-dev = component(name, 'M', descr)
+dev = component.component(name, 'M', descr)
 dev.add_tags = (tags)
 dev.set_url(url)
 
 pins = (
   # power
-  pin('VCC', 'power_in'),
-  pin('GND', 'power_in'),
+  component.pin('VCC', 'power_in'),
+  component.pin('GND', 'power_in'),
   # lcd
-  pin('LCD_CS', 'in'),
-  pin('LCD_RESET', 'in'),
-  pin('LCD_DC', 'in'),
-  pin('LCD_SDI', 'in'),
-  pin('LCD_SCK', 'in'),
-  pin('LCD_LED', 'in'),
-  pin('LCD_SDO', 'out'),
+  component.pin('LCD_CS', 'in'),
+  component.pin('LCD_RESET', 'in'),
+  component.pin('LCD_DC', 'in'),
+  component.pin('LCD_SDI', 'in'),
+  component.pin('LCD_SCK', 'in'),
+  component.pin('LCD_LED', 'in'),
+  component.pin('LCD_SDO', 'out'),
   # touch screen
-  pin('TS_CLK', 'in', group=1),
-  pin('TS_CS', 'in', group=1),
-  pin('TS_DI', 'in', group=1),
-  pin('TS_DO', 'out', group=1),
-  pin('TS_IRQ', 'out', group=1),
+  component.pin('TS_CLK', 'in', group=1),
+  component.pin('TS_CS', 'in', group=1),
+  component.pin('TS_DI', 'in', group=1),
+  component.pin('TS_DO', 'out', group=1),
+  component.pin('TS_IRQ', 'out', group=1),
   # SD card
-  pin('SD_CS', 'in', group=2),
-  pin('SD_MOSI', 'in', group=2),
-  pin('SD_MISO', 'out', group=2),
-  pin('SD_CLK', 'in', group=2),
+  component.pin('SD_CS', 'in', group=2),
+  component.pin('SD_MOSI', 'in', group=2),
+  component.pin('SD_MISO', 'out', group=2),
+  component.pin('SD_CLK', 'in', group=2),
 )
 
 dev.add_pins(pins)
+component.db.add(dev)
 
 #-----------------------------------------------------------------------------
 

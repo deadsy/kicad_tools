@@ -6,6 +6,7 @@ GooGooMuck Library Files
 
 import kicad
 import footprint
+import component
 
 #-----------------------------------------------------------------------------
 # components
@@ -16,15 +17,6 @@ import components.bcmjtag
 import components.ili9341
 import components.mb997
 import components.rotenc
-
-components = (
-  components.tlc5940.dev,
-  components._7404.dev,
-  components.bcmjtag.dev,
-  components.ili9341.dev,
-  components.mb997.dev,
-  components.rotenc.dev,
-)
 
 #-----------------------------------------------------------------------------
 # footprints
@@ -38,10 +30,10 @@ import footprints.soic
 lib_name = 'ggm'
 
 lib = kicad.lib_file(lib_name)
-lib.add_components(components)
+lib.add_components(component.db.values())
 
 dcm = kicad.dcm_file(lib_name)
-dcm.add_components(components)
+dcm.add_components(component.db.values())
 
 mod = footprint.db.values()
 
