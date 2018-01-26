@@ -1,9 +1,10 @@
+#BASE = /home/jasonh/work/jasonh
+BASE = /home/jasonh/work
 
-KICAD_UTILS = /home/jasonh/work/kicad-library-utils
+KICAD_UTILS = $(BASE)/kicad-library-utils
 CHKLIB = $(KICAD_UTILS)/schlib/checklib.py
 CHKMOD = $(KICAD_UTILS)/pcb/check_kicad_mod.py
-
-DST = /home/jasonh/work/googoomuck/hw
+DST = $(BASE)/googoomuck/hw
 
 LIB = ggm.lib
 DCM = ggm.dcm
@@ -29,4 +30,3 @@ clean:
 	-rm $(DCM)
 	-rm *.kicad_mod
 	-rm *.pyc
-
