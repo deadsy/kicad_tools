@@ -73,15 +73,15 @@ class dip(object):
     mod.add_tags(('DIL', 'DIP', 'PDIP', '%dmil' % kicad.mm2mil(self.w)))
     # add text: silk reference (center top)
     t = kicad.mod_text('REF**', 'reference', 'F.SilkS')
-    t.set_xy(self.w / 2.0, -self.pitch)
+    t.set_xy((self.w / 2.0, -self.pitch))
     mod.add_shape(t)
     # add text: fab name (center bottom)
     t = kicad.mod_text(self.name, 'value', 'F.Fab')
-    t.set_xy(self.w / 2.0, self.h + self.pitch)
+    t.set_xy((self.w / 2.0, self.h + self.pitch))
     mod.add_shape(t)
     # add text: fab reference (center)
     t = kicad.mod_text('%R', 'user', 'F.Fab')
-    t.set_xy(self.w / 2.0, self.h / 2.0)
+    t.set_xy((self.w / 2.0, self.h / 2.0))
     mod.add_shape(t)
     # add the pads
     pad_size = 1.6
@@ -90,8 +90,7 @@ class dip(object):
       pad_shape = ('oval', 'rect')[i == 0]
       p = kicad.mod_pad('%d' % (i + 1), 'thru_hole', pad_shape, ('*.Cu', '*.Mask'))
       p.set_size(pad_size, pad_size).set_drill(hole_size)
-      (x, y) = self.pad_xy(i)
-      p.set_xy(x, y)
+      p.set_xy(self.pad_xy(i))
       mod.add_pad(p)
 
     self.courtyard(mod)

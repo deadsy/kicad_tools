@@ -114,11 +114,11 @@ class ili9341(object):
     """add a fab layer"""
     # fab name at top left
     t = kicad.mod_text(name, 'value', 'F.Fab')
-    t.set_xy(kicad.mil2mm(0), kicad.mil2mm(-3250))
+    t.set_xy((kicad.mil2mm(0), kicad.mil2mm(-3250)))
     mod.add_shape(t)
     # fab reference at top left
     t = kicad.mod_text('%R', 'user', 'F.Fab')
-    t.set_xy(kicad.mil2mm(0), kicad.mil2mm(-3150))
+    t.set_xy((kicad.mil2mm(0), kicad.mil2mm(-3150)))
     mod.add_shape(t)
     # board outline
     x = (kicad.mil2mm(1300) - self.w)/2.0
@@ -129,11 +129,11 @@ class ili9341(object):
     """add a silk layer"""
     # silk reference
     t = kicad.mod_text('REF**', 'reference', 'F.SilkS')
-    t.set_xy(0, kicad.mil2mm(-100))
+    t.set_xy((0, kicad.mil2mm(-100)))
     mod.add_shape(t)
     # silk pin 1
     t = kicad.mod_text('1', 'user', 'F.SilkS')
-    t.set_xy(kicad.mil2mm(-100), 0)
+    t.set_xy((kicad.mil2mm(-100), 0))
     mod.add_shape(t)
     # add the connector outlines
     ch = kicad.mil2mm(100)
@@ -162,10 +162,10 @@ class ili9341(object):
     tr = (x0 + w, y0 - h)
     bl = (x0, y0)
     br = (x0 + w, y0)
-    for (x, y) in (tl, tr, bl, br):
+    for v in (tl, tr, bl, br):
       p = kicad.mod_pad('', 'thru_hole', 'circle', ('*.Cu', '*.Mask'))
       p.set_size(pad_size, pad_size).set_drill(hole_size)
-      p.set_xy(x, y)
+      p.set_xy(v)
       mod.add_pad(p)
 
   def pads(self, mod):
@@ -176,8 +176,7 @@ class ili9341(object):
       pad_shape = ('circle', 'rect')[i == 0]
       p = kicad.mod_pad('%d' % (i + 1), 'thru_hole', pad_shape, ('*.Cu', '*.Mask'))
       p.set_size(pad_size, pad_size).set_drill(hole_size)
-      (x, y) = self.pad_xy(i)
-      p.set_xy(x, y)
+      p.set_xy(self.pad_xy(i))
       mod.add_pad(p)
 
   def __str__(self):

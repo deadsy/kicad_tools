@@ -80,8 +80,7 @@ class re10982(object):
       pad_shape = ('circle', 'rect')[i == 0]
       p = kicad.mod_pad(self.pad_name(i), 'thru_hole', pad_shape, ('*.Cu', '*.Mask'))
       p.set_size(pad_size, pad_size).set_drill(hole_size)
-      (x, y) = self.pad_xy(i)
-      p.set_xy(x, y)
+      p.set_xy(self.pad_xy(i))
       mod.add_pad(p)
 
   def add_courtyard(self, mod):
@@ -102,22 +101,22 @@ class re10982(object):
     mod.add_rect(x, y, w, h, 'F.Fab', 0.1)
     # fab name
     t = kicad.mod_text(self.name, 'value', 'F.Fab')
-    t.set_xy(4.0, 7.0) # center
+    t.set_xy((4.0, 7.0)) # center
     mod.add_shape(t)
     # fab reference
     t = kicad.mod_text('%R', 'user', 'F.Fab')
-    t.set_xy(-0.5, 2.0) # top left
+    t.set_xy((-0.5, 2.0)) # top left
     mod.add_shape(t)
 
   def add_silk(self, mod):
     """add a silk layer"""
     # silk reference
     t = kicad.mod_text('REF**', 'reference', 'F.SilkS')
-    t.set_xy(-1.0, 15.0) # bottom left
+    t.set_xy((-1.0, 15.0)) # bottom left
     mod.add_shape(t)
     # silk pin 1
     t = kicad.mod_text('1', 'user', 'F.SilkS')
-    t.set_xy(-1.5, 0)
+    t.set_xy((-1.5, 0))
     mod.add_shape(t)
 
   def add_holes(self, mod):
@@ -129,10 +128,10 @@ class re10982(object):
     y0 = 7.0
     lh = (x0, y0)
     rh = (x0 + d, y0)
-    for (x, y) in (lh, rh):
+    for v in (lh, rh):
       p = kicad.mod_pad('', 'thru_hole', 'circle', ('*.Cu', '*.Mask'))
       p.set_size(pad_size, pad_size).set_drill(hole_size)
-      p.set_xy(x, y)
+      p.set_xy(v)
       mod.add_pad(p)
 
   def __str__(self):

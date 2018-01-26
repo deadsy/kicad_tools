@@ -200,8 +200,7 @@ class mb997(object):
         pad_name = '%s%d' % (('A', 'B')[row == 1], n + 1)
         p = kicad.mod_pad(pad_name, 'thru_hole', pad_shape, ('*.Cu', '*.Mask'))
         p.set_size(pad_size, pad_size).set_drill(hole_size)
-        (x, y) = self.pad_xy(row, n)
-        p.set_xy(x, y)
+        p.set_xy(self.pad_xy(row, n))
         mod.add_pad(p)
 
   def add_courtyard(self, mod):
@@ -218,11 +217,11 @@ class mb997(object):
     mod.add_rect(x, y, self.w, self.h, 'F.Fab', 0.1)
     # fab name at top left
     t = kicad.mod_text(name, 'value', 'F.Fab')
-    t.set_xy(kicad.mil2mm(-125), kicad.mil2mm(-1300))
+    t.set_xy((kicad.mil2mm(-125), kicad.mil2mm(-1300)))
     mod.add_shape(t)
     # fab reference at top left
     t = kicad.mod_text('%R', 'user', 'F.Fab')
-    t.set_xy(kicad.mil2mm(-125), kicad.mil2mm(-1200))
+    t.set_xy((kicad.mil2mm(-125), kicad.mil2mm(-1200)))
     mod.add_shape(t)
 
   def add_silk(self, mod):
@@ -236,11 +235,11 @@ class mb997(object):
       mod.add_rect(cx, cy, cw, ch, 'F.SilkS', 0.12)
     # silk reference
     t = kicad.mod_text('REF**', 'reference', 'F.SilkS')
-    t.set_xy(kicad.mil2mm(25), kicad.mil2mm(-100))
+    t.set_xy((kicad.mil2mm(25), kicad.mil2mm(-100)))
     mod.add_shape(t)
     # silk pin 1
     t = kicad.mod_text('A1', 'user', 'F.SilkS')
-    t.set_xy(kicad.mil2mm(-100), 0)
+    t.set_xy((kicad.mil2mm(-100), 0))
     mod.add_shape(t)
 
   def __str__(self):

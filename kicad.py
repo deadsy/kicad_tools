@@ -255,9 +255,9 @@ class mod_pad(object):
     # thermal_width
     # thermal_gap
 
-  def set_xy(self, x, y):
+  def set_xy(self, v):
     """set the xy position"""
-    self.at = mod_at(x, y)
+    self.at = mod_at(v[0], v[1])
     return self
 
   def set_size(self, w, h):
@@ -326,9 +326,9 @@ class mod_text(object):
     self.effects = mod_effects()
     self.at = None
 
-  def set_xy(self, x, y):
+  def set_xy(self, v):
     """set the xy position"""
-    self.at = mod_at(x, y)
+    self.at = mod_at(v[0], v[1])
     return self
 
   def __str__(self):
