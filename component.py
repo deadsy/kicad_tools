@@ -27,7 +27,7 @@ class pin(object):
         side = 'L'
       elif self.name in ('VCC', 'VDD', '3V', '5V'):
         side = 'T'
-      elif self.name in ('GND',):
+      elif self.name in ('VEE', 'VSS', 'GND',):
         side = 'B'
       else:
         # default to right hand side
