@@ -14,38 +14,35 @@ dev = component.component('TLC5940', 'U', '16-Channel LED Driver')
 dev.add_tags(('LED', 'PWM'))
 dev.set_url('http://www.ti.com/product/TLC5940')
 
-pins = (
-  component.pin('VCC', 'power_in'),
-  component.pin('GND', 'power_in'),
-  component.pin('BLANK', 'in'),
-  component.pin('XLAT', 'in'),
-  component.pin('SCLK', 'in'),
-  component.pin('SIN', 'in'),
-  component.pin('VPRG', 'in'),
-  component.pin('IREF', 'in'),
-  component.pin('DCPRG', 'in'),
-  component.pin('GSCLK', 'in'),
-  component.pin('OUT0', 'out'),
-  component.pin('OUT1', 'out'),
-  component.pin('OUT2', 'out'),
-  component.pin('OUT3', 'out'),
-  component.pin('OUT4', 'out'),
-  component.pin('OUT5', 'out'),
-  component.pin('OUT6', 'out'),
-  component.pin('OUT7', 'out'),
-  component.pin('OUT8', 'out'),
-  component.pin('OUT9', 'out'),
-  component.pin('OUT10', 'out'),
-  component.pin('OUT11', 'out'),
-  component.pin('OUT12', 'out'),
-  component.pin('OUT13', 'out'),
-  component.pin('OUT14', 'out'),
-  component.pin('OUT15', 'out'),
-  component.pin('SOUT', 'out', group=1),
-  component.pin('XERR', 'out', group=1),
-)
+dev.add_pin('VCC', 'power_in')
+dev.add_pin('GND', 'power_in')
+dev.add_pin('BLANK', 'in')
+dev.add_pin('XLAT', 'in')
+dev.add_pin('SCLK', 'in')
+dev.add_pin('SIN', 'in')
+dev.add_pin('VPRG', 'in')
+dev.add_pin('IREF', 'in')
+dev.add_pin('DCPRG', 'in')
+dev.add_pin('GSCLK', 'in')
+dev.add_pin('OUT0', 'out')
+dev.add_pin('OUT1', 'out')
+dev.add_pin('OUT2', 'out')
+dev.add_pin('OUT3', 'out')
+dev.add_pin('OUT4', 'out')
+dev.add_pin('OUT5', 'out')
+dev.add_pin('OUT6', 'out')
+dev.add_pin('OUT7', 'out')
+dev.add_pin('OUT8', 'out')
+dev.add_pin('OUT9', 'out')
+dev.add_pin('OUT10', 'out')
+dev.add_pin('OUT11', 'out')
+dev.add_pin('OUT12', 'out')
+dev.add_pin('OUT13', 'out')
+dev.add_pin('OUT14', 'out')
+dev.add_pin('OUT15', 'out')
+dev.add_pin('SOUT', 'out').set_group(1)
+dev.add_pin('XERR', 'out').set_group(1)
 
-dev.add_pins(pins)
 component.db.add(dev)
 
 #-----------------------------------------------------------------------------

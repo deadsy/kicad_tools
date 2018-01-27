@@ -23,61 +23,56 @@ dev = component.component(name, 'M', descr)
 dev.add_tags = (tags)
 dev.set_url(url)
 
-pins = []
 # add all the io pins
 for (j, port) in enumerate(('A', 'B', 'C', 'D', 'E',)):
   for k in range(16):
-    pins.append(component.pin('P%s%d' % (port, k), 'inout', side=('L', 'R')[j & 1 == 0], group=j + 1))
+    dev.add_pin('P%s%d' % (port, k), 'inout').set_side(('L', 'R')[j & 1 == 0]).set_group(j + 1)
 
 # fixups
-component.append_pin_name(pins, 'PA0', 'SW_PUSH')
-component.append_pin_name(pins, 'PA1', 'system_reset')
-component.append_pin_name(pins, 'PA4', 'I2S3_WS')
-component.append_pin_name(pins, 'PA5', 'SPI1_SCK')
-component.append_pin_name(pins, 'PA6', 'SPI1_MISO')
-component.append_pin_name(pins, 'PA7', 'SPI1_MOSI')
-component.append_pin_name(pins, 'PA9', 'VBUS_FS')
-component.append_pin_name(pins, 'PA10', 'OTG_FS_ID')
-component.append_pin_name(pins, 'PA13', 'SWDIO')
-component.append_pin_name(pins, 'PA14', 'SWCLK')
-component.append_pin_name(pins, 'PB3', 'SWO')
-component.append_pin_name(pins, 'PB6', 'Audio_SCL')
-component.append_pin_name(pins, 'PB9', 'Audio_SDA')
-component.append_pin_name(pins, 'PB10', 'CLK_IN')
-component.append_pin_name(pins, 'PC0', 'OTG_FS_PSON')
-component.append_pin_name(pins, 'PC3', 'PDM_OUT')
-component.append_pin_name(pins, 'PC7', 'I2S3_MCK')
-component.append_pin_name(pins, 'PC10', 'I2S3_SCK')
-component.append_pin_name(pins, 'PC12', 'I2S3_SD')
-component.append_pin_name(pins, 'PC14', 'osc_in')
-component.append_pin_name(pins, 'PC15', 'osc_out')
-component.append_pin_name(pins, 'PD4', 'Audio_RST')
-component.append_pin_name(pins, 'PD5', 'OTG_FS_OC')
-component.append_pin_name(pins, 'PD12', 'LED4')
-component.append_pin_name(pins, 'PD13', 'LED3')
-component.append_pin_name(pins, 'PD14', 'LED5')
-component.append_pin_name(pins, 'PD15', 'LED6')
-component.append_pin_name(pins, 'PE0', 'MEMS_INT1')
-component.append_pin_name(pins, 'PE1', 'MEMS_INT2')
-component.append_pin_name(pins, 'PE3', 'MEMS_CS')
+dev.get_pin('PA0').add_names(('SW_PUSH',))
+dev.get_pin('PA1').add_names(('system_reset',))
+dev.get_pin('PA4').add_names(('I2S3_WS',))
+dev.get_pin('PA5').add_names(('SPI1_SCK',))
+dev.get_pin('PA6').add_names(('SPI1_MISO',))
+dev.get_pin('PA7').add_names(('SPI1_MOSI',))
+dev.get_pin('PA9').add_names(('VBUS_FS',))
+dev.get_pin('PA10').add_names(('OTG_FS_ID',))
+dev.get_pin('PA13').add_names(('SWDIO',))
+dev.get_pin('PA14').add_names(('SWCLK',))
+dev.get_pin('PB3').add_names(('SWO',))
+dev.get_pin('PB6').add_names(('Audio_SCL',))
+dev.get_pin('PB9').add_names(('Audio_SDA',))
+dev.get_pin('PB10').add_names(('CLK_IN',))
+dev.get_pin('PC0').add_names(('OTG_FS_PSON',))
+dev.get_pin('PC3').add_names(('PDM_OUT',))
+dev.get_pin('PC7').add_names(('I2S3_MCK',))
+dev.get_pin('PC10').add_names(('I2S3_SCK',))
+dev.get_pin('PC12').add_names(('I2S3_SD',))
+dev.get_pin('PC14').add_names(('osc_in',))
+dev.get_pin('PC15').add_names(('osc_out',))
+dev.get_pin('PD4').add_names(('Audio_RST',))
+dev.get_pin('PD5').add_names(('OTG_FS_OC',))
+dev.get_pin('PD12').add_names(('LED4',))
+dev.get_pin('PD13').add_names(('LED3',))
+dev.get_pin('PD14').add_names(('LED5',))
+dev.get_pin('PD15').add_names(('LED6',))
+dev.get_pin('PE0').add_names(('MEMS_INT1',))
+dev.get_pin('PE1').add_names(('MEMS_INT2',))
+dev.get_pin('PE3').add_names(('MEMS_CS',))
 
-component.remove_pin(pins, 'PA11')
-component.remove_pin(pins, 'PA12')
+dev.del_pin('PA11')
+dev.del_pin('PA12')
 
-other_pins = (
-  component.pin('NRST', 'in'),
-  component.pin('PH0/OSC_IN', 'inout'),
-  component.pin('PH1/OSC_OUT', 'inout'),
-  component.pin('BOOT0', 'in'),
-  component.pin('NC', 'nc'),
-  component.pin('3V', 'power_in', group=0),
-  component.pin('5V', 'power_in', group=1),
-  component.pin('VDD', 'power_in', group=2),
-  component.pin('GND', 'power_in'),
-)
-pins.extend(other_pins)
+dev.add_pin('NRST', 'in')
+dev.add_pin('PH0', 'inout').add_names(('OSC_IN',))
+dev.add_pin('PH1', 'inout').add_names(('OSC_OUT',))
+dev.add_pin('BOOT0', 'in')
+dev.add_pin('NC', 'nc')
+dev.add_pin('3V', 'power_in').set_group(0)
+dev.add_pin('5V', 'power_in').set_group(1)
+dev.add_pin('VDD', 'power_in').set_group(2)
+dev.add_pin('GND', 'power_in')
 
-dev.add_pins(pins)
 component.db.add(dev)
 
 #-----------------------------------------------------------------------------
@@ -85,22 +80,22 @@ component.db.add(dev)
 pin_map = {
   '5V': ('B3', 'B4',),
   'BOOT0': ('B21',),
-  'PH0/OSC_IN': ('B7',),
-  'PC12/I2S3_SD': ('B35',),
-  'PE3/MEMS_CS': ('B16',),
-  'PC14/osc_in': ('B9',),
-  'PB9/Audio_SDA': ('B20',),
-  'PD5/OTG_FS_OC': ('B29',),
-  'PA6/SPI1_MISO': ('A18',),
-  'PB10/CLK_IN': ('A34',),
-  'PA14/SWCLK': ('B39',),
-  'PA10/OTG_FS_ID': ('B41',),
+  'PH0': ('B7',),
+  'PC12': ('B35',),
+  'PE3': ('B16',),
+  'PC14': ('B9',),
+  'PB9': ('B20',),
+  'PD5': ('B29',),
+  'PA6': ('A18',),
+  'PB10': ('A34',),
+  'PA14': ('B39',),
+  'PA10': ('B41',),
   'PA2': ('A14',),
   'PA3': ('A13',),
-  'PA0/SW_PUSH': ('A12',),
-  'PD14/LED5': ('A46',),
+  'PA0': ('A12',),
+  'PD14': ('A46',),
   'PA8': ('B43',),
-  'PD4/Audio_RST': ('B32',),
+  'PD4': ('B32',),
   'PC11': ('B38',),
   'PC13': ('B12',),
   'VDD': ('A3', 'A4', 'B22',),
@@ -111,23 +106,23 @@ pin_map = {
   'PB0': ('A22',),
   'PB2': ('A24',),
   'PB8': ('B19',),
-  'PH1/OSC_OUT': ('B8',),
+  'PH1': ('B8',),
   'NRST': ('A6',),
   'PC8': ('B45',),
   'PC9': ('B46',),
   'PC2': ('A10',),
   'PC1': ('A7',),
   'PC6': ('B47',),
-  'PC15/osc_out': ('B10',),
+  'PC15': ('B10',),
   'PC5': ('A19',),
   'PD11': ('A43',),
   'PD10': ('A42',),
-  'PA9/VBUS_FS': ('B44',),
-  'PB3/SWO': ('B28',),
-  'PC10/I2S3_SCK': ('B37',),
-  'PB6/Audio_SCL': ('B23',),
-  'PA4/I2S3_WS': ('A16',),
-  'PE0/MEMS_INT1': ('B17',),
+  'PA9': ('B44',),
+  'PB3': ('B28',),
+  'PC10': ('B37',),
+  'PB6': ('B23',),
+  'PA4': ('A16',),
+  'PE0': ('B17',),
   'PD9': ('A41',),
   'PD8': ('A40',),
   'PD7': ('B27',),
@@ -137,12 +132,12 @@ pin_map = {
   'PD2': ('B34',),
   'PD1': ('B33',),
   'PD0': ('B36',),
-  'PC3/PDM_OUT': ('A9',),
-  'PA1/system_reset': ('A11',),
-  'PE1/MEMS_INT2': ('B18',),
+  'PC3': ('A9',),
+  'PA1': ('A11',),
+  'PE1': ('B18',),
   '3V': ('B5', 'B6',),
-  'PA7/SPI1_MOSI': ('A17',),
-  'PC0/OTG_FS_PSON': ('A8',),
+  'PA7': ('A17',),
+  'PC0': ('A8',),
   'PE8': ('A26',),
   'PE9': ('A27',),
   'PE4': ('B13',),
@@ -150,20 +145,20 @@ pin_map = {
   'PE6': ('B11',),
   'PE7': ('A25',),
   'PE2': ('B15',),
-  'PD15/LED6': ('A47',),
-  'PC7/I2S3_MCK': ('B48',),
+  'PD15': ('A47',),
+  'PC7': ('B48',),
   'PB11': ('A35',),
   'PB13': ('A37',),
   'PB12': ('A36',),
   'PB15': ('A39',),
   'PB14': ('A38',),
-  'PA5/SPI1_SCK': ('A15',),
+  'PA5': ('A15',),
   'PC4': ('A20',),
   'GND': ('A1', 'A2', 'A5', 'A23', 'A49', 'A50', 'B1', 'B2', 'B49', 'B50',),
   'PA15': ('B40',),
-  'PD13/LED3': ('A45',),
-  'PD12/LED4': ('A44',),
-  'PA13/SWDIO': ('B42',),
+  'PD13': ('A45',),
+  'PD12': ('A44',),
+  'PA13': ('B42',),
   'PE14': ('A32',),
   'PE15': ('A33',),
   'PE12': ('A30',),

@@ -14,29 +14,26 @@ dev = component.component('BCMJTAG', 'U', 'Broadcom 16 pin JTAG Connector (BCM94
 dev.add_tags(('JTAG',))
 dev.set_url('https://www.broadcom.com/products/wireless/wireless-lan-infrastructure/bcm49408')
 
-pins = (
-  # jtag
-  component.pin('TDI', 'out'),
-  component.pin('TDO', 'in'),
-  component.pin('TMS', 'out'),
-  component.pin('TCK', 'out'),
-  component.pin('TRST_L', 'out'),
+# jtag
+dev.add_pin('TDI', 'out')
+dev.add_pin('TDO', 'in')
+dev.add_pin('TMS', 'out')
+dev.add_pin('TCK', 'out')
+dev.add_pin('TRST_L', 'out')
+# spi ??
+dev.add_pin('DBG_CLK', 'out').set_group(1)
+dev.add_pin('DBG_EN_N', 'out').set_group(1)
+dev.add_pin('DBG_SOUT', 'in').set_group(1)
+dev.add_pin('DBG_SIN', 'out').set_group(1)
+# serial port
+dev.add_pin('UART0_RX', 'out').set_group(2)
+dev.add_pin('UART0_TX', 'in').set_group(2)
+# system
+dev.add_pin('RESET_L', 'out').set_group(3)
+# power
+dev.add_pin('VDD', 'power_in') # 3.3V target voltage
+dev.add_pin('GND', 'power_in')
 
-  component.pin('DBG_CLK', 'out', group=1),
-  component.pin('DBG_EN_N', 'out', group=1),
-  component.pin('DBG_SOUT', 'in', group=1),
-  component.pin('DBG_SIN', 'out', group=1),
-  # serial port
-  component.pin('UART0_RX', 'out', group=2),
-  component.pin('UART0_TX', 'in', group=2),
-  # system
-  component.pin('RESET_L', 'out', group=3),
-  # power
-  component.pin('VDD', 'power_in'), # 3.3V target voltage
-  component.pin('GND', 'power_in'),
-)
-
-dev.add_pins(pins)
 component.db.add(dev)
 
 #-----------------------------------------------------------------------------

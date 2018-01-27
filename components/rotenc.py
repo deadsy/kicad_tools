@@ -24,18 +24,15 @@ dev = component.component(name, 'S', descr)
 dev.add_tags = (tags)
 dev.set_url(url)
 
-pins = (
-  component.pin('PH_A', 'out'),
-  component.pin('PH_Com', 'out'),
-  component.pin('PH_B', 'out'),
-  component.pin('LED_R', 'in'),
-  component.pin('LED_G', 'in'),
-  component.pin('PB', 'out'),
-  component.pin('LED_B', 'in'),
-  component.pin('Com', 'power_in'),
-)
+dev.add_pin('PH_A', 'out')
+dev.add_pin('PH_Com', 'out')
+dev.add_pin('PH_B', 'out')
+dev.add_pin('LED_R', 'in')
+dev.add_pin('LED_G', 'in')
+dev.add_pin('PB', 'out')
+dev.add_pin('LED_B', 'in')
+dev.add_pin('Com', 'power_in')
 
-dev.add_pins(pins)
 component.db.add(dev)
 
 #-----------------------------------------------------------------------------

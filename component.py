@@ -14,34 +14,47 @@ import kicad
 class pin(object):
   """single component pin"""
 
-  def __init__(self, name, pin_type, side=None, group=0, unit=0):
-    self.name = name
+  def __init__(self, pin_name, pin_type):
+    self.names = [pin_name,]
     self.pin_type = pin_type
-    self.group = group # pin grouping on schematic symbol
-    self.unit = unit # symbol unit E.g. 0..5 for a hex inverter
-    # work out the side of the symbol the pin is on
-    if side is None:
-      if self.pin_type == 'out':
-        side = 'R'
-      elif pin_type == 'in':
-        side = 'L'
-      elif self.name in ('VCC', 'VDD', '3V', '5V'):
-        side = 'T'
-      elif self.name in ('VEE', 'VSS', 'GND',):
-        side = 'B'
-      else:
-        # default to right hand side
-        side = 'R'
-    else:
-      assert side in ('T', 'L', 'R', 'B'), 'bad symbol side %s' % side
+    self.group = 0 # pin grouping on schematic symbol
+    self.unit = 0 # symbol unit E.g. 0..5 for a hex inverter
+    # work out the side of the symbol (default right) the pin is on
+    side = 'R'
+    if self.pin_type == 'out':
+      side = 'R'
+    elif pin_type == 'in':
+      side = 'L'
+    elif pin_name in ('VCC', 'VDD', '3V', '5V'):
+      side = 'T'
+    elif pin_name in ('VEE', 'VSS', 'GND',):
+      side = 'B'
     self.side = side
 
+  def add_names(self, names):
+    """add alternate pin names"""
+    self.names.extend(names)
+    return self
+
+  def set_side(self, side):
+    assert side in ('T', 'L', 'R', 'B'), 'bad symbol side %s' % side
+    self.side = side
+    return self
+
+  def set_group(self, group):
+    self.group = group
+    return self
+
+  def set_unit(self, unit):
+    self.unit = unit
+    return self
+
   def sort_key(self):
-    """return a sort key, sort pins by group and then lexicographically by name"""
+    """return a sort key, sort pins by group and then lexicographically by primary name"""
     tmp = ''
     state = None
     x = [self.group,]
-    for c in self.name:
+    for c in self.names[0]:
       if c in string.digits:
         if state == 'str':
           x.append(tmp)
@@ -63,28 +76,9 @@ class pin(object):
       x.append(tmp)
     return x
 
-def rename_pin(pins, old_name, new_name):
-  """rename a pin in the pin list"""
-  for p in pins:
-    if p.name == old_name:
-      p.name = new_name
-      return
-
-def append_pin_name(pins, name, more_names):
-  """append more names to a named pin"""
-  for p in pins:
-    if p.name == name:
-      p.name = '%s/%s' % (name, more_names)
-      return
-  assert False, 'pin name %s not found' % name
-
-def remove_pin(pins, name):
-  """remove a named pin from the list"""
-  for (i,p) in enumerate(pins):
-    if p.name == name:
-      del pins[i]
-      return
-  assert False, 'pin name %s not found' % name
+  def __str__(self):
+    """return the full pin name"""
+    return '/'.join(self.names)
 
 #-----------------------------------------------------------------------------
 
@@ -120,7 +114,7 @@ class pinset(object):
     x = 0
     for (_, p) in self.pins:
       if p.side == side:
-        x = max(x, (len(p.name) + 2) * pin_text_size)
+        x = max(x, (len(str(p)) + 2) * pin_text_size)
     return x
 
   def pin_size(self, side):
@@ -207,11 +201,20 @@ class component(object):
     self.url = url
     return self
 
-  def add_pins(self, pins):
-    """add a set of pins"""
-    for p in pins:
-      assert self.name2pin.has_key(p.name) is False, 'duplicate pin name %s in component %s' % (p.name, self.name)
-      self.name2pin[p.name] = p
+  def add_pin(self, pin_name, pin_type):
+    """create a pin and add it to the component"""
+    assert self.name2pin.has_key(pin_name) is False, 'duplicate pin name %s in component %s' % (pin_name, self.name)
+    p = pin(pin_name, pin_type)
+    self.name2pin[pin_name] = p
+    return p
+
+  def get_pin(self, pin_name):
+    """return a named pin"""
+    return self.name2pin[pin_name]
+
+  def del_pin(self, pin_name):
+    """delete a named pin"""
+    del self.name2pin[pin_name]
 
   def add_footprint(self, fp_name, pin_map):
     """add a footprint"""
@@ -240,7 +243,7 @@ class component(object):
       (pin_number, pin) = v
       x = x0 + (i * pin_delta_space) + (pin.group * pin_group_space)
       (pin_number, pin) = v
-      p = kicad.lib_pin(pin_number, pin.name)
+      p = kicad.lib_pin(pin_number, str(pin))
       p.ofs_xy(x, y0)
       p.set_orientation('D')
       p.set_type(pin.pin_type)
@@ -251,7 +254,7 @@ class component(object):
     y0 = -h/2 - pin_length
     for i, v in enumerate(pins.on_side('B')):
       (pin_number, pin) = v
-      p = kicad.lib_pin(pin_number, pin.name)
+      p = kicad.lib_pin(pin_number, str(pin))
       x = x0 + (i * pin_delta_space) + (pin.group * pin_group_space)
       p.ofs_xy(x, y0)
       p.set_orientation('U')
@@ -263,7 +266,7 @@ class component(object):
     y0 = h/2 - pin_corner_space
     for i, v in enumerate(pins.on_side('L')):
       (pin_number, pin) = v
-      p = kicad.lib_pin(pin_number, pin.name)
+      p = kicad.lib_pin(pin_number, str(pin))
       y = y0 - (i * pin_delta_space) - (pin.group * pin_group_space)
       p.ofs_xy(x0, y)
       p.set_orientation('R')
@@ -275,7 +278,7 @@ class component(object):
     y0 = h/2 - pin_corner_space
     for i, v in enumerate(pins.on_side('R')):
       (pin_number, pin) = v
-      p = kicad.lib_pin(pin_number, pin.name)
+      p = kicad.lib_pin(pin_number, str(pin))
       y = y0 - (i * pin_delta_space) - (pin.group * pin_group_space)
       p.ofs_xy(x0, y)
       p.set_orientation('L')

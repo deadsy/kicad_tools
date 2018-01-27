@@ -28,32 +28,29 @@ dev = component.component(name, 'M', descr)
 dev.add_tags = (tags)
 dev.set_url(url)
 
-pins = (
-  # power
-  component.pin('VCC', 'power_in'),
-  component.pin('GND', 'power_in'),
-  # lcd
-  component.pin('LCD_CS', 'in'),
-  component.pin('LCD_RESET', 'in'),
-  component.pin('LCD_DC', 'in'),
-  component.pin('LCD_SDI', 'in'),
-  component.pin('LCD_SCK', 'in'),
-  component.pin('LCD_LED', 'in'),
-  component.pin('LCD_SDO', 'out'),
-  # touch screen
-  component.pin('TS_CLK', 'in', group=1),
-  component.pin('TS_CS', 'in', group=1),
-  component.pin('TS_DI', 'in', group=1),
-  component.pin('TS_DO', 'out', group=1),
-  component.pin('TS_IRQ', 'out', group=1),
-  # SD card
-  component.pin('SD_CS', 'in', group=2),
-  component.pin('SD_MOSI', 'in', group=2),
-  component.pin('SD_MISO', 'out', group=2),
-  component.pin('SD_CLK', 'in', group=2),
-)
+# power
+dev.add_pin('VCC', 'power_in')
+dev.add_pin('GND', 'power_in')
+# lcd
+dev.add_pin('LCD_CS', 'in')
+dev.add_pin('LCD_RESET', 'in')
+dev.add_pin('LCD_DC', 'in')
+dev.add_pin('LCD_SDI', 'in')
+dev.add_pin('LCD_SCK', 'in')
+dev.add_pin('LCD_LED', 'in')
+dev.add_pin('LCD_SDO', 'out')
+# touch screen
+dev.add_pin('TS_CLK', 'in').set_group(1)
+dev.add_pin('TS_CS', 'in').set_group(1)
+dev.add_pin('TS_DI', 'in').set_group(1)
+dev.add_pin('TS_DO', 'out').set_group(1)
+dev.add_pin('TS_IRQ', 'out').set_group(1)
+# SD card
+dev.add_pin('SD_CS', 'in').set_group(2)
+dev.add_pin('SD_MOSI', 'in').set_group(2)
+dev.add_pin('SD_MISO', 'out').set_group(2)
+dev.add_pin('SD_CLK', 'in').set_group(2)
 
-dev.add_pins(pins)
 component.db.add(dev)
 
 #-----------------------------------------------------------------------------

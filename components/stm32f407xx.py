@@ -21,43 +21,38 @@ dev = component.component(name, 'U', descr)
 dev.add_tags = (tags)
 dev.set_url(url)
 
-pins = []
 # add all the io pins
-for port in ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'):
-  for i in range(16):
-    pins.append(component.pin('P%s%d' % (port, i), 'inout'))
+for (j, port) in enumerate(('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I')):
+  for k in range(16):
+    dev.add_pin('P%s%d' % (port, k), 'inout').set_group(j + 1)
+
+dev.add_pin('VBAT', 'power_in')
+dev.add_pin('VSS', 'power_in')
+dev.add_pin('VDD', 'power_in')
+dev.add_pin('NRST', 'inout')
+dev.add_pin('VSSA', 'power_in')
+dev.add_pin('VREF-', 'power_in')
+dev.add_pin('VREF+', 'power_in')
+dev.add_pin('VDDA', 'power_in')
+dev.add_pin('BYPASS_REG', 'in')
+dev.add_pin('VCAP_1', 'power_in')
+dev.add_pin('VCAP_2', 'power_in')
+dev.add_pin('BOOT0', 'in')
+dev.add_pin('PDR_ON', 'in')
 
 # fixups
-component.append_pin_name(pins, 'PA0', 'WKUP')
-component.append_pin_name(pins, 'PA13', 'JTMS-SWDIO')
-component.append_pin_name(pins, 'PA14', 'JTCK/SWCLK')
-component.append_pin_name(pins, 'PA15', 'JTDI')
-component.append_pin_name(pins, 'PB2', 'BOOT1')
-component.append_pin_name(pins, 'PB3', 'JTDO/TRACESWO')
-component.append_pin_name(pins, 'PB4', 'NJTRST')
-component.append_pin_name(pins, 'PC14', 'OSC32_IN')
-component.append_pin_name(pins, 'PC15', 'OSC32_OUT')
-component.append_pin_name(pins, 'PH0', 'OSC_IN')
-component.append_pin_name(pins, 'PH1', 'OSC_OUT')
+dev.get_pin('PA0').add_names(('WKUP',))
+dev.get_pin('PA13').add_names(('JTMS' 'SWDIO',))
+dev.get_pin('PA14').add_names(('JTCK', 'SWCLK',))
+dev.get_pin('PA15').add_names(('JTDI',))
+dev.get_pin('PB2').add_names(('BOOT1',))
+dev.get_pin('PB3').add_names(('JTDO', 'TRACESWO',))
+dev.get_pin('PB4').add_names(('NJTRST',))
+dev.get_pin('PC14').add_names(('OSC32_IN',))
+dev.get_pin('PC15').add_names(('OSC32_OUT',))
+dev.get_pin('PH0').add_names(('OSC_IN',))
+dev.get_pin('PH1').add_names(('OSC_OUT',))
 
-other_pins = (
-  component.pin('VBAT', 'power_in'),
-  component.pin('VSS', 'power_in'),
-  component.pin('VDD', 'power_in'),
-  component.pin('NRST', 'inout'),
-  component.pin('VSSA', 'power_in'),
-  component.pin('VREF-', 'power_in'),
-  component.pin('VREF+', 'power_in'),
-  component.pin('VDDA', 'power_in'),
-  component.pin('BYPASS_REG', 'in'),
-  component.pin('VCAP_1', 'power_in'),
-  component.pin('VCAP_2', 'power_in'),
-  component.pin('BOOT0', 'in'),
-  component.pin('PDR_ON', 'in'),
-)
-pins.extend(other_pins)
-
-dev.add_pins(pins)
 component.db.add(dev)
 
 #-----------------------------------------------------------------------------
@@ -66,10 +61,10 @@ component.db.add(dev)
 pin_map = {
   'VBAT': (1,),
   'PC13': (2,),
-  'PC14/OSC32_IN': (3,),
-  'PC15/OSC32_OUT': (4,),
-  'PH0/OSC_IN': (5,),
-  'PH1/OSC_OUT': (6,),
+  'PC14': (3,),
+  'PC15': (4,),
+  'PH0': (5,),
+  'PH1': (6,),
   'NRST': (7,),
   'PC0': (8,),
   'PC1': (9,),
@@ -77,7 +72,7 @@ pin_map = {
   'PC3': (11,),
   'VSSA': (12,),
   'VDDA': (13,),
-  'PA0/WKUP': (14,),
+  'PA0': (14,),
   'PA1': (15,),
   'PA2': (16,),
   'PA3': (17,),
@@ -90,13 +85,13 @@ pin_map = {
   'PC5': (25,),
   'PB0': (26,),
   'PB1': (27,),
-  'PB2/BOOT1': (28,),
+  'PB2': (28,),
   'PB10': (29,),
   'PB11': (30,),
   'VCAP_1': (31,),
   'VDD': (19, 32, 48, 64),
   'VCAP_2': (47,),
-  'PA13/JTMS-SWDIO': (46,),
+  'PA13': (46,),
   'PA12': (45,),
   'PA11': (44,),
   'PA10': (43,),
@@ -116,14 +111,14 @@ pin_map = {
   'PB7': (59,),
   'PB6': (58,),
   'PB5': (57,),
-  'PB4/NJTRST': (56,),
-  'PB3/JTDO/TRACESWO': (55,),
+  'PB4': (56,),
+  'PB3': (55,),
   'PD2': (54,),
   'PC12': (53,),
   'PC11': (52,),
   'PC10': (51,),
-  'PA15/JTDI': (50,),
-  'PA14/JTCK/SWCLK': (49,),
+  'PA15': (50,),
+  'PA14': (49,),
 }
 
 dev.add_footprint('LQFP64', pin_map)
